@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>XEOM 工作室 · 跨区域学生创作团队 - 模块·应用·系统</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop offset=%270%27 stop-color=%23007AFF%27/%3E%3Cstop offset=%271%27 stop-color=%235856D6%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27url(%23g)%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-family=%27Arial,sans-serif%27 font-size=%2716%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27%3EXE%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007AFF',
+                        secondary: '#5856D6',
+                        success: '#34C759',
+                        warning: '#FF9500',
+                        danger: '#FF3B30'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', 'Arial', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --secondary: #5856D6;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            /* 暗色模式（默认） */
+            --bg-main: #000000;
+            --text-main: #f5f5f7;
+            --text-muted: #8e8e93;
+            --text-dim: rgba(255,255,255,0.4);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-bg-strong: rgba(28, 28, 30, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-border-strong: rgba(255, 255, 255, 0.18);
+            --nav-bg: rgba(0, 0, 0, 0.55);
+            --nav-bg-scrolled: rgba(0, 0, 0, 0.8);
+            --card-hover: rgba(255,255,255,0.10);
+            --scrollbar-thumb: rgba(255,255,255,0.2);
+            --scrollbar-thumb-hover: rgba(255,255,255,0.4);
+            --section-bg: rgba(255,255,255,0.02);
+            --border-subtle: rgba(255,255,255,0.05);
+            --footer-text: #8e8e93;
+            --overlay-bg: rgba(0,0,0,0.6);
+            --tag-bg: rgba(0,122,255,0.15);
+            --tag-text: #0A84FF;
+            --join-btn-bg: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+        }
+        [data-theme="light"] {
+            --primary: #007AFF;
+            --secondary: #5856D6;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            /* 亮色模式 */
+            --bg-main: #f2f2f7;
+            --text-main: #1c1c1e;
+            --text-muted: #636366;
+            --text-dim: rgba(0,0,0,0.4);
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-bg-strong: rgba(255, 255, 255, 0.78);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-border-strong: rgba(255, 255, 255, 0.9);
+            --nav-bg: rgba(255, 255, 255, 0.65);
+            --nav-bg-scrolled: rgba(255, 255, 255, 0.85);
+            --card-hover: rgba(255,255,255,0.9);
+            --scrollbar-thumb: rgba(0,0,0,0.2);
+            --scrollbar-thumb-hover: rgba(0,0,0,0.35);
+            --section-bg: rgba(0,0,0,0.02);
+            --border-subtle: rgba(0,0,0,0.06);
+            --footer-text: #8e8e93;
+            --overlay-bg: rgba(255,255,255,0.5);
+            --tag-bg: rgba(0,122,255,0.10);
+            --tag-text: #007AFF;
+        }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.18) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(88, 86, 214, 0.18) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(52, 199, 89, 0.12) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(255, 149, 0, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        [data-theme="light"] body {
+            background-image:
+                radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(88, 86, 214, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(52, 199, 89, 0.08) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(255, 149, 0, 0.08) 0px, transparent 50%);
+        }
+        /* 毛玻璃卡片 */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        [data-theme="dark"] .glass-card {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .glass-card-strong {
+            background: var(--glass-bg-strong);
+            backdrop-filter: blur(50px) saturate(200%);
+            -webkit-backdrop-filter: blur(50px) saturate(200%);
+            border: 1px solid var(--glass-border-strong);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        [data-theme="dark"] .glass-card-strong {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #AF52DE 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .glow-blue { box-shadow: 0 0 30px rgba(0, 122, 255, 0.35); }
+        .glow-purple { box-shadow: 0 0 30px rgba(88, 86, 214, 0.35); }
+        .glow-green { box-shadow: 0 0 30px rgba(52, 199, 89, 0.35); }
+        .ios-btn {
+            background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #fff;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        [data-theme="light"] .ios-btn {
+            background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+            border: 1px solid rgba(255,255,255,0.9);
+            color: #1c1c1e;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .ios-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 122, 255, 0.3); }
+        .ios-btn:active { transform: scale(0.97); }
+        .ios-btn-primary {
+            background: linear-gradient(135deg, #0A84FF 0%, #0066DD 100%) !important;
+            border: none !important; color: #fff !important;
+            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
+        }
+        [data-theme="light"] .ios-btn-primary {
+            background: linear-gradient(135deg, #0A84FF 0%, #0066DD 100%) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.35);
+        }
+        .ios-btn-primary:hover { background: linear-gradient(135deg, #1A8CFF 0%, #0077F5 100%) !important; box-shadow: 0 8px 28px rgba(0, 122, 255, 0.55) !important; }
+        .ios-btn-join {
+            background: var(--join-btn-bg) !important;
+            border: none !important; color: #fff !important;
+            box-shadow: 0 4px 20px rgba(88, 86, 214, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="light"] .ios-btn-join {
+            box-shadow: 0 4px 20px rgba(88, 86, 214, 0.35);
+        }
+        .ios-btn-join::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        .ios-btn-join:hover::before { left: 100%; }
+        .ios-btn-join:hover { box-shadow: 0 8px 28px rgba(88, 86, 214, 0.6) !important; transform: translateY(-2px) scale(1.02); }
+        /* 主题切换按钮 */
+        .theme-toggle-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+        .theme-toggle-btn:hover { transform: scale(1.08); background: var(--card-hover); }
+        .svg-icon { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex-shrink: 0; line-height: 1; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+        .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        .fade-in-delay-1 { transition-delay: 0.1s; }
+        .fade-in-delay-2 { transition-delay: 0.2s; }
+        .fade-in-delay-3 { transition-delay: 0.3s; }
+        .fade-in-delay-4 { transition-delay: 0.4s; }
+        .fade-in-delay-5 { transition-delay: 0.5s; }
+        .fade-in-delay-6 { transition-delay: 0.6s; }
+
+        /* 导航栏 */
+        nav {
+            background: var(--nav-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 0.5px solid var(--border-subtle);
+            transition: all 0.3s ease;
+        }
+        nav.scrolled { background: var(--nav-bg-scrolled); box-shadow: 0 4px 30px rgba(0,0,0,0.12); }
+        [data-theme="dark"] nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.3); }
+        nav a { color: var(--text-main); }
+        #mobileMenu {
+            border-top-color: var(--border-subtle) !important;
+        }
+        .nav-join-btn {
+            padding: 7px 16px; border-radius: 100px; font-size: 0.85rem; font-weight: 600;
+            background: var(--join-btn-bg); color: white !important;
+            border: none; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 14px rgba(88, 86, 214, 0.35);
+            transition: all 0.3s ease;
+        }
+        .nav-join-btn:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 6px 20px rgba(88, 86, 214, 0.5); }
+
+        /* ============ 开屏启动动画 - 毛玻璃质感 ============ */
+        #splashScreen {
+            position: fixed; inset: 0; z-index: 9999;
+            background:
+                radial-gradient(at 20% 20%, rgba(0, 122, 255, 0.25) 0px, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(88, 86, 214, 0.25) 0px, transparent 50%),
+                radial-gradient(at 80% 80%, rgba(52, 199, 89, 0.18) 0px, transparent 50%),
+                radial-gradient(at 20% 80%, rgba(255, 149, 0, 0.18) 0px, transparent 50%),
+                var(--bg-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            overflow: hidden;
+        }
+        #splashScreen::before {
+            content: ''; position: absolute; inset: -20%;
+            background:
+                radial-gradient(circle at 30% 40%, rgba(0,122,255,0.3) 0%, transparent 40%),
+                radial-gradient(circle at 70% 60%, rgba(88,86,214,0.3) 0%, transparent 40%),
+                radial-gradient(circle at 50% 80%, rgba(175,82,222,0.2) 0%, transparent 40%);
+            filter: blur(60px);
+            animation: splashOrb 8s ease-in-out infinite alternate;
+        }
+        @keyframes splashOrb {
+            0% { transform: scale(1) translate(0,0); }
+            100% { transform: scale(1.2) translate(20px,-20px); }
+        }
+        .splash-glass-panel {
+            position: relative; z-index: 2;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px; padding: 48px 56px;
+            display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+            animation: splashFloat 3s ease-in-out infinite alternate;
+        }
+        [data-theme="dark"] .splash-glass-panel {
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        @keyframes splashFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+        #splashScreen.fade-out { opacity: 0; visibility: hidden; }
+        .splash-logo { width: 110px; height: 110px; position: relative; margin-bottom: 32px; }
+        .splash-logo-ring {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 3px solid transparent; border-top-color: var(--primary); border-right-color: var(--secondary);
+            animation: spinRing 1.5s linear infinite;
+        }
+        .splash-logo-inner {
+            position: absolute; inset: 14px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; font-weight: bold; color: white;
+            animation: pulseLogo 2s ease-in-out infinite;
+            box-shadow: 0 8px 24px rgba(0,122,255,0.4);
+        }
+        @keyframes spinRing { to { transform: rotate(360deg); } }
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0,122,255,0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(88,86,214,0.6); }
+        }
+        .splash-title {
+            font-size: 28px; font-weight: bold; letter-spacing: 4px;
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 8px; opacity: 0; animation: fadeInUp 0.6s ease forwards 0.3s;
+        }
+        .splash-subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; letter-spacing: 2px; opacity: 0; animation: fadeInUp 0.6s ease forwards 0.5s; }
+        .splash-progress-container {
+            width: 260px; height: 6px; background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 3px; overflow: hidden; margin-bottom: 14px;
+            opacity: 0; animation: fadeInUp 0.6s ease forwards 0.7s;
+        }
+        .splash-progress-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 2px; transition: width 0.2s ease;
+            box-shadow: 0 0 10px rgba(0,122,255,0.5);
+        }
+        .splash-boot-text {
+            height: 20px; font-family: 'SF Mono', 'Courier New', monospace;
+            font-size: 12px; color: var(--success); opacity: 0;
+            animation: fadeInUp 0.6s ease forwards 0.8s;
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .text-muted { color: var(--text-muted); }
+        .section-tinted { background: var(--section-bg); }
+        .border-subtle { border-color: var(--border-subtle); }
+
+        /* 主题切换图标动画 */
+        .theme-icon { transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1); }
+        .theme-toggle-btn:hover .theme-icon { transform: rotate(30deg); }
+
+        /* ============ 团队分组 & 成员卡片 ============ */
+        .group-section { margin-bottom: 48px; }
+        .group-header {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 20px;
+        }
+        .group-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; flex-shrink: 0;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .group-title-text h3 { font-size: 1.35rem; font-weight: 700; margin: 0; }
+        .group-title-text p { font-size: 0.875rem; color: var(--text-muted); margin: 2px 0 0 0; }
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        @media (max-width: 640px) {
+            .member-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        }
+        .member-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        [data-theme="dark"] .member-card {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .member-card:hover {
+            transform: translateY(-6px);
+            background: var(--card-hover);
+            box-shadow: 0 12px 36px rgba(0,122,255,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+        .member-avatar {
+            width: 64px; height: 64px; border-radius: 18px;
+            margin: 0 auto 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; font-weight: 800; color: white;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+            letter-spacing: -0.5px;
+        }
+        .member-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+        .member-role {
+            font-size: 0.8rem; color: var(--tag-text);
+            background: var(--tag-bg);
+            padding: 3px 10px; border-radius: 20px;
+            display: inline-block; margin-bottom: 10px; font-weight: 500;
+        }
+        .member-desc {
+            font-size: 0.82rem; color: var(--text-muted);
+            line-height: 1.55; margin: 0;
+        }
+
+        /* 创立徽章 */
+        .founding-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 18px; border-radius: 100px;
+            background: linear-gradient(135deg, rgba(0,122,255,0.15), rgba(88,86,214,0.15));
+            border: 1px solid rgba(0,122,255,0.25);
+            font-size: 0.875rem; font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* 时间线 */
+        .timeline-item {
+            position: relative; padding-left: 28px;
+            padding-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: ''; position: absolute; left: 7px; top: 6px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 0 4px var(--bg-main), 0 0 12px rgba(0,122,255,0.4);
+        }
+        .timeline-item::after {
+            content: ''; position: absolute; left: 11px; top: 20px;
+            width: 2px; bottom: 0;
+            background: linear-gradient(to bottom, var(--glass-border), transparent);
+        }
+        .timeline-item:last-child::after { display: none; }
+
+        /* ============ 招募版块 ============ */
+        .recruit-hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 18px; border-radius: 100px;
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.15), rgba(0, 122, 255, 0.15));
+            border: 1px solid rgba(52, 199, 89, 0.3);
+            font-size: 0.875rem; font-weight: 600;
+            color: var(--success);
+            margin-bottom: 20px;
+            animation: pulseBadge 2s ease-in-out infinite;
+        }
+        @keyframes pulseBadge {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.3); }
+            50% { box-shadow: 0 0 0 10px rgba(52, 199, 89, 0); }
+        }
+        .recruit-card {
+            position: relative;
+            overflow: hidden;
+            padding: 2rem !important;
+        }
+        .recruit-card::before {
+            content: ''; position: absolute; top: -50%; right: -30%;
+            width: 300px; height: 300px; border-radius: 50%;
+            filter: blur(80px); opacity: 0.5;
+            pointer-events: none;
+        }
+        .recruit-card.android::before {
+            background: #34C759;
+        }
+        .recruit-card.ios::before {
+            background: #007AFF;
+        }
+        .recruit-card.general::before {
+            background: #AF52DE;
+        }
+        [data-theme="light"] .recruit-card::before { opacity: 0.35; }
+        .recruit-icon-wrap {
+            width: 64px; height: 64px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            position: relative; z-index: 1;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .recruit-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .skill-list {
+            list-style: none; padding: 0; margin: 16px 0 0 0;
+            position: relative; z-index: 1;
+        }
+        .skill-list li {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 8px 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            position: relative;
+        }
+        .skill-list li .skill-check {
+            flex-shrink: 0;
+            width: 20px; height: 20px; margin-top: 2px;
+            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; font-size: 11px; font-weight: bold;
+        }
+        .join-cta-card {
+            background: linear-gradient(135deg, rgba(0,122,255,0.12), rgba(88,86,214,0.12), rgba(175,82,222,0.12));
+            border: 1px solid rgba(0,122,255,0.25);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-radius: 28px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,122,255,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        [data-theme="dark"] .join-cta-card {
+            box-shadow: 0 20px 60px rgba(0,122,255,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .join-cta-card::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(0,122,255,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(175,82,222,0.2) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        .join-big-btn {
+            position: relative; z-index: 1;
+            display: inline-flex; align-items: center; gap: 12px;
+            padding: 16px 40px;
+            border-radius: 100px;
+            background: var(--join-btn-bg);
+            color: white; font-size: 1.1rem; font-weight: 700;
+            border: none; cursor: pointer; text-decoration: none;
+            box-shadow: 0 8px 30px rgba(88,86,214,0.5);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow: hidden;
+        }
+        .join-big-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            transition: left 0.7s ease;
+        }
+        .join-big-btn:hover::before { left: 100%; }
+        .join-big-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 40px rgba(88,86,214,0.7);
+        }
+        .join-big-btn:active { transform: translateY(-1px) scale(1.01); }
+
+        /* 桌面端大气排版 */
+        @media (min-width: 1024px) {
+            .hero-title { font-size: 5.5rem !important; line-height: 1.05; }
+        }
+
+        /* ============ 投资人版块 ============ */
+        .investor-hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 18px; border-radius: 100px;
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.15), rgba(255, 45, 85, 0.15));
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            font-size: 0.875rem; font-weight: 600;
+            color: var(--warning);
+            margin-bottom: 20px;
+        }
+        .investor-banner {
+            position: relative;
+            overflow: hidden;
+            border-radius: 32px;
+            padding: 3rem 2.5rem !important;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, rgba(255,149,0,0.10), rgba(255,45,85,0.10), rgba(175,82,222,0.10));
+            border: 1px solid rgba(255,149,0,0.25);
+        }
+        [data-theme="dark"] .investor-banner {
+            background: linear-gradient(135deg, rgba(255,149,0,0.08), rgba(255,45,85,0.08), rgba(175,82,222,0.08));
+        }
+        .investor-banner::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 15% 25%, rgba(255,149,0,0.25) 0%, transparent 35%),
+                radial-gradient(circle at 85% 75%, rgba(255,45,85,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(175,82,222,0.12) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .investor-card {
+            position: relative;
+            overflow: hidden;
+            padding: 2rem !important;
+            transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+        }
+        .investor-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px rgba(255,149,0,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+        .investor-card::before {
+            content: ''; position: absolute; top: -40%; right: -25%;
+            width: 260px; height: 260px; border-radius: 50%;
+            filter: blur(80px); opacity: 0.45;
+            pointer-events: none;
+        }
+        .investor-card.resources::before { background: #FF9500; }
+        .investor-card.strategy::before { background: #5856D6; }
+        .investor-card.longterm::before { background: #34C759; }
+        [data-theme="light"] .investor-card::before { opacity: 0.3; }
+        .investor-icon-wrap {
+            width: 64px; height: 64px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px;
+            margin-bottom: 20px;
+            position: relative; z-index: 1;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .req-list { list-style: none; padding: 0; margin: 16px 0 0 0; position: relative; z-index: 1; }
+        .req-list li {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 8px 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.55;
+        }
+        .req-list li .req-dot {
+            flex-shrink: 0;
+            width: 20px; height: 20px; margin-top: 2px;
+            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: white; font-size: 11px; font-weight: bold;
+        }
+        .req-dot.orange { background: linear-gradient(135deg, #FF9500, #FF2D55); }
+        .req-dot.purple { background: linear-gradient(135deg, #5856D6, #AF52DE); }
+        .req-dot.green { background: linear-gradient(135deg, #34C759, #30D158); }
+        .investor-contact-card {
+            background: linear-gradient(135deg, rgba(255,149,0,0.12), rgba(255,45,85,0.12), rgba(175,82,222,0.12));
+            border: 1px solid rgba(255,149,0,0.25);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-radius: 28px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative; overflow: hidden;
+            box-shadow: 0 20px 60px rgba(255,149,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        [data-theme="dark"] .investor-contact-card {
+            box-shadow: 0 20px 60px rgba(255,149,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .investor-contact-card::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255,149,0,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255,45,85,0.2) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        .investor-btn {
+            position: relative; z-index: 1;
+            display: inline-flex; align-items: center; gap: 12px;
+            padding: 16px 40px; border-radius: 100px;
+            background: linear-gradient(135deg, #FF9500 0%, #FF2D55 100%);
+            color: white; font-size: 1.05rem; font-weight: 700;
+            border: none; cursor: pointer; text-decoration: none;
+            box-shadow: 0 8px 30px rgba(255,45,85,0.45);
+            transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+            overflow: hidden;
+        }
+        .investor-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            transition: left 0.7s ease;
+        }
+        .investor-btn:hover::before { left: 100%; }
+        .investor-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 40px rgba(255,45,85,0.65);
+        }
+        .investor-btn:active { transform: translateY(-1px) scale(1.01); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+        <defs>
+            <linearGradient id="xeomGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#007AFF"/>
+                <stop offset="0.5" stop-color="#5856D6"/>
+                <stop offset="1" stop-color="#AF52DE"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- 开屏 - 毛玻璃质感 -->
+    <div id="splashScreen">
+        <div class="splash-glass-panel">
+            <div class="splash-logo">
+                <div class="splash-logo-ring"></div>
+                <div class="splash-logo-inner">XE</div>
+            </div>
+            <div class="splash-title">XEOM 工作室</div>
+            <div class="splash-subtitle">🎓 跨区域学生团队 · 模块 · 应用 · 系统</div>
+            <div class="splash-progress-container">
+                <div class="splash-progress-bar" id="splashProgress"></div>
+            </div>
+            <div class="splash-boot-text" id="bootText">正在初始化毛玻璃渲染引擎...</div>
+        </div>
+    </div>
+
+    <!-- 导航 -->
+    <nav class="fixed w-full z-40">
+        <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="text-xl sm:text-2xl font-bold text-gradient tracking-wider">XEOM 工作室</div>
+            </div>
+            <div class="hidden md:flex space-x-7 text-sm items-center">
+                <a href="#home" class="hover:text-primary transition-colors">首页</a>
+                <a href="#philosophy" class="hover:text-primary transition-colors">设计理念</a>
+                <a href="#story" class="hover:text-primary transition-colors">创立故事</a>
+                <a href="#products" class="hover:text-primary transition-colors">我们做什么</a>
+                <a href="#team" class="hover:text-primary transition-colors">核心团队</a>
+                <a href="#recruit" class="hover:text-primary transition-colors">加入我们</a>
+                <a href="#investor" class="hover:text-primary transition-colors">投资人合作</a>
+                <a href="https://qm.qq.com/q/eAUAe0275Y" target="_blank" rel="noopener noreferrer" class="nav-join-btn">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M12 2C6.48 2 2 6.04 2 11c0 2.52 1.17 4.78 3.03 6.37-.12.56-.48 2.03-.55 2.34-.09.4.15.4.32.29.13-.08 2.07-1.41 2.9-1.99 1.3.37 2.73.58 4.3.58 5.52 0 10-4.04 10-9s-4.48-9-10-9z"/></svg>
+                    加入群聊
+                </a>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="themeToggleBtn" class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-xl" aria-label="切换主题" title="切换日/夜模式">
+                    <svg id="themeIconDark" class="svg-icon theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg id="themeIconLight" class="svg-icon theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                </button>
+                <button id="mobileMenuBtn" class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl ios-btn" aria-label="菜单">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><line x1="3.5" y1="6.5" x2="20.5" y2="6.5"/><line x1="3.5" y1="12" x2="20.5" y2="12"/><line x1="3.5" y1="17.5" x2="20.5" y2="17.5"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden md:hidden glass-card-strong absolute w-full border-t border-white/10">
+            <div class="flex flex-col p-6 space-y-4">
+                <a href="#home" class="block hover:text-primary">首页</a>
+                <a href="#philosophy" class="block hover:text-primary">设计理念</a>
+                <a href="#story" class="block hover:text-primary">创立故事</a>
+                <a href="#products" class="block hover:text-primary">我们做什么</a>
+                <a href="#team" class="block hover:text-primary">核心团队</a>
+                <a href="#recruit" class="block hover:text-primary">加入我们</a>
+                <a href="#investor" class="block hover:text-primary">投资人合作</a>
+                <a href="https://qm.qq.com/q/eAUAe0275Y" target="_blank" rel="noopener noreferrer" class="ios-btn ios-btn-join px-5 py-3 rounded-xl font-semibold text-center mt-2">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M12 2C6.48 2 2 6.04 2 11c0 2.52 1.17 4.78 3.03 6.37-.12.56-.48 2.03-.55 2.34-.09.4.15.4.32.29.13-.08 2.07-1.41 2.9-1.99 1.3.37 2.73.58 4.3.58 5.52 0 10-4.04 10-9s-4.48-9-10-9z"/></svg>
+                    一键加入 QQ 群
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section id="home" class="min-h-screen flex items-center justify-center relative pt-20 px-4 sm:px-6">
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <div class="absolute top-20 left-10 w-72 h-72 sm:w-96 sm:h-96 bg-blue-500/15 rounded-full blur-[100px] sm:blur-[120px] animate-pulse"></div>
+            <div class="absolute bottom-20 right-10 w-72 h-72 sm:w-96 sm:h-96 bg-purple-500/15 rounded-full blur-[100px] sm:blur-[120px] animate-pulse" style="animation-delay:1s"></div>
+        </div>
+        <div class="container mx-auto text-center z-10 max-w-5xl">
+            <div class="inline-flex items-center gap-2 glass-card px-4 py-2 rounded-full mb-6 sm:mb-8 fade-in text-xs sm:text-sm">
+                <span>✨</span>
+                <span class="text-muted">🎓 跨区域学生团队 · 模块 · 应用 · 系统 · 昼夜双主题 · 招募中 · 寻找天使投资人</span>
+            </div>
+            <h1 class="hero-title text-4xl sm:text-6xl md:text-7xl font-bold mb-5 sm:mb-6 text-gradient fade-in">重塑数字体验</h1>
+            <p class="text-base sm:text-xl md:text-2xl text-muted mb-4 sm:mb-6 max-w-3xl mx-auto fade-in fade-in-delay-1 leading-relaxed">
+                <span class="text-gradient font-bold">模块 · 应用 · 系统</span> — 三位一体，专注极致毛玻璃美学
+            </p>
+            <p class="text-sm sm:text-base text-muted mb-4 sm:mb-6 max-w-3xl mx-auto fade-in fade-in-delay-1 leading-relaxed">
+                我们是一群<span class="text-gradient font-bold">来自不同城市、不同区域</span>的在校学生，因对极致毛玻璃美学的共同热爱在网络上相聚。
+                跨越地域，线上协作，利用课余时间从零打造<span style="color:var(--accent-cyan);font-weight:600">模块、应用、系统</span>三层产品体系，把通透质感带到每一个屏幕。
+            </p>
+            <p class="text-sm sm:text-base text-muted mb-6 sm:mb-8 max-w-2xl mx-auto fade-in fade-in-delay-1 opacity-85">
+                没有同一个城市的办公室，没有线下集中的工位，但我们有纯粹的热爱、敢想的创意，和跨越山海依然准时上线的协作默契。
+            </p>
+            <div class="fade-in fade-in-delay-2 mb-8 sm:mb-10 flex justify-center">
+                <span class="founding-badge">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    创立于 2026 年 9 月 4 日
+                </span>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center fade-in fade-in-delay-3 flex-wrap">
+                <a href="#products" class="ios-btn ios-btn-primary px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg glow-blue">
+                    🧩 查看我们做什么
+                </a>
+                <a href="#team" class="ios-btn px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg">
+                    认识核心团队
+                </a>
+                <a href="#recruit" class="ios-btn ios-btn-join px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg glow-purple">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M12 2C6.48 2 2 6.04 2 11c0 2.52 1.17 4.78 3.03 6.37-.12.56-.48 2.03-.55 2.34-.09.4.15.4.32.29.13-.08 2.07-1.41 2.9-1.99 1.3.37 2.73.58 4.3.58 5.52 0 10-4.04 10-9s-4.48-9-10-9z"/></svg>
+                    加入我们
+                </a>
+                <a href="#investor" class="ios-btn px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg" style="background:linear-gradient(180deg,rgba(255,149,0,0.22),rgba(255,45,85,0.18));border-color:rgba(255,149,0,0.35);color:#FFB340">
+                    💼 投资合作
+                </a>
+                <a href="#philosophy" class="ios-btn px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg">
+                    了解设计理念
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 设计理念 -->
+    <section id="philosophy" class="py-16 sm:py-20 px-4 sm:px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-10 sm:mb-16 text-center text-gradient fade-in">核心设计理念</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
+                <div class="glass-card rounded-3xl p-6 sm:p-8 hover:scale-[1.03] transition-all duration-300 group fade-in fade-in-delay-1">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center mb-5 sm:mb-6">
+                        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;color:var(--primary)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">极致毛玻璃</h3>
+                    <p class="text-muted leading-relaxed text-sm sm:text-base">
+                        深度借鉴原生毛玻璃设计语言，采用 backdrop-filter 实时模糊、精妙的圆角曲率、自然的动画曲线，让每一块卡片都通透如玉，光线与层次自然流动。
+                    </p>
+                </div>
+                <div class="glass-card rounded-3xl p-6 sm:p-8 hover:scale-[1.03] transition-all duration-300 group fade-in fade-in-delay-2">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-green-500/20 to-teal-500/20 flex items-center justify-center mb-5 sm:mb-6">
+                        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;color:#34C759"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-teal-400">流畅动效</h3>
+                    <p class="text-muted leading-relaxed text-sm sm:text-base">
+                        遵循 iOS 级动画缓动曲线 cubic-bezier，从出现、悬浮到消失，每一个过渡都追求 60fps 的丝滑体验，让交互充满呼吸感与生命力。
+                    </p>
+                </div>
+                <div class="glass-card rounded-3xl p-6 sm:p-8 hover:scale-[1.03] transition-all duration-300 group fade-in fade-in-delay-3">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-orange-500/20 to-pink-500/20 flex items-center justify-center mb-5 sm:mb-6">
+                        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;color:#FF9500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-400">昼夜双主题</h3>
+                    <p class="text-muted leading-relaxed text-sm sm:text-base">
+                        支持白天/暗色模式一键切换，智能记忆用户偏好。毛玻璃在明暗主题下均呈现最优通透质感，全天候护眼舒适，色彩对比度严格符合 WCAG 标准。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 创立故事 -->
+    <section id="story" class="py-16 sm:py-20 px-4 sm:px-6 section-tinted">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center text-gradient fade-in">我们的故事 · 一群学生的梦想起点</h2>
+            <div class="glass-card rounded-3xl p-6 sm:p-10 fade-in fade-in-delay-1">
+                <div class="rounded-3xl p-5 sm:p-8 mb-8 text-center" style="background:linear-gradient(135deg, rgba(0,122,255,0.12), rgba(88,86,214,0.08));border:1px solid rgba(0,122,255,0.18)">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 text-sm font-semibold" style="background:linear-gradient(135deg, rgba(255,149,0,0.22), rgba(255,45,85,0.22));color:#FFB340;border:1px solid rgba(255,149,0,0.3)">
+                        🎓 学生创作团队 · Student-Led Studio
+                    </div>
+                    <p class="leading-relaxed text-base sm:text-lg mb-3" style="color:var(--text-main)">
+                        XEOM 工作室<span class="text-gradient font-bold">不是一家商业公司</span>，而是一群<span class="text-gradient font-bold">分散在不同城市、不同区域</span>的在校学生，
+                        因对极致毛玻璃美学、对精致数字产品的共同热爱，<span style="color:var(--accent-violet);font-weight:600">跨越地域在网络上相聚</span>，在课余时间自发组建的创作团队。
+                    </p>
+                    <p class="text-muted text-sm sm:text-base leading-relaxed mb-2">
+                        我们中有高中生、有大学生，天南海北——写代码的在一座城市、做设计的在另一座，有搞产品的、有玩动效的——
+                        白天各自上课，深夜通过语音、文档、代码仓库协作，在宿舍、在图书馆、在各自城市的台灯下，共同打磨一份作品。
+                    </p>
+                    <p class="text-muted text-sm sm:text-base leading-relaxed">
+                        <span style="color:var(--text-main);font-weight:600">2026 年 9 月 4 日</span>，XEOM 在一场跨城市的线上会议中正式宣告成立。
+                        这不是一场商业冒险，而是一群天各一方的年轻人，想把"喜欢"变成"作品"的认真尝试。
+                    </p>
+                </div>
+                <div class="space-y-1">
+                    <div class="timeline-item">
+                        <h4 class="font-bold text-base sm:text-lg mb-1">2026 年 9 月 4 日 · 跨区域线上启动</h4>
+                        <p class="text-muted text-sm sm:text-base leading-relaxed">核心创始团队——一群<span style="color:var(--text-main);font-weight:500">分散在不同城市、平均年龄不到 20 岁的学生</span>——在这一天通过线上会议共同发起 XEOM 项目，敲下第一行代码，确立"模块 · 应用 · 系统"三层产品体系与"毛玻璃美学 × 极致性能"的方向，五组协作架构同步成型。</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4 class="font-bold text-base sm:text-lg mb-1">设计与开发并行推进</h4>
+                        <p class="text-muted text-sm sm:text-base leading-relaxed">设计组与开发组紧密配合，从视觉语言、组件规范到动画交互，每一个细节反复打磨，确保像素级还原。</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4 class="font-bold text-base sm:text-lg mb-1">产品组把控体验，新成员持续加入</h4>
+                        <p class="text-muted text-sm sm:text-base leading-relaxed">产品组全程跟进体验细节，不断注入新鲜血液，新成员组为工作室带来多元视角与持续活力。</p>
+                    </div>
+                </div>
+                <div class="mt-8 p-5 sm:p-6 rounded-2xl" style="background:linear-gradient(135deg,rgba(0,122,255,0.08),rgba(88,86,214,0.08));border:1px solid rgba(0,122,255,0.15)">
+                    <p class="text-center italic text-sm sm:text-base" style="color:var(--text-main);opacity:0.85">
+                        "我们追求每一个像素的完美，每一次交互的极致。"<br/>
+                        <span style="font-size:0.8em;opacity:0.6">—— XEOM 工作室</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 我们做什么 · 模块 · 应用 · 系统 -->
+    <section id="products" class="py-16 sm:py-20 px-4 sm:px-6">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-12 sm:mb-16 fade-in">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm mb-4" style="background:linear-gradient(135deg,rgba(175,82,222,0.2),rgba(0,122,255,0.15));border:1px solid rgba(175,82,222,0.3);color:#BF5AF2">
+                    <span>🧩</span> 三层产品体系
+                </div>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gradient">我们做什么 · 模块 · 应用 · 系统</h2>
+                <p class="text-muted text-base sm:text-lg max-w-2xl mx-auto">从底层组件到独立应用、再到完整系统，XEOM 以三层结构层层递进，把毛玻璃美学落实到每一个层级。</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+                <!-- 模块 -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8 fade-in fade-in-delay-1 group hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+                    <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-30" style="background:radial-gradient(circle,#34C759,transparent)"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5" style="background:linear-gradient(135deg,rgba(52,199,89,0.25),rgba(52,199,89,0.1));border:1px solid rgba(52,199,89,0.3)">🧩</div>
+                        <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color:#34C759">Layer 01</div>
+                        <h3 class="text-xl sm:text-2xl font-bold mb-3" style="color:var(--text-main)">模块 · Modules</h3>
+                        <p class="text-muted text-sm sm:text-base leading-relaxed mb-5">
+                            可复用的毛玻璃 UI 组件、动画库、系统级模块（如状态栏、通知中心、控制中心、启动器主题模块等），
+                            为上层应用和系统提供稳定、美观、高性能的基础组件。
+                        </p>
+                        <ul class="space-y-2.5 text-sm">
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot green mt-0.5">✓</span><span>跨端毛玻璃组件库（Web / Android / iOS）</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot green mt-0.5">✓</span><span>系统级 Magisk / LSPosed 视觉模块</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot green mt-0.5">✓</span><span>iOS 越狱美化主题模块（Snowboard 等）</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot green mt-0.5">✓</span><span>动效与模糊渲染优化内核</span></li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap gap-2">
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(52,199,89,0.12);color:#34C759;border:1px solid rgba(52,199,89,0.2)">组件库</span>
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(52,199,89,0.12);color:#34C759;border:1px solid rgba(52,199,89,0.2)">系统模块</span>
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(52,199,89,0.12);color:#34C759;border:1px solid rgba(52,199,89,0.2)">主题引擎</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 应用 -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8 fade-in fade-in-delay-2 group hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+                    <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-30" style="background:radial-gradient(circle,#007AFF,transparent)"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5" style="background:linear-gradient(135deg,rgba(0,122,255,0.25),rgba(0,122,255,0.1));border:1px solid rgba(0,122,255,0.3)">📱</div>
+                        <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color:#007AFF">Layer 02</div>
+                        <h3 class="text-xl sm:text-2xl font-bold mb-3" style="color:var(--text-main)">应用 · Applications</h3>
+                        <p class="text-muted text-sm sm:text-base leading-relaxed mb-5">
+                            基于自研毛玻璃模块打造的独立应用：桌面启动器、天气、笔记、音乐、设置工具等，
+                            每一款都贯彻通透质感与极致动效，让用户真正摸到 XEOM 美学。
+                        </p>
+                        <ul class="space-y-2.5 text-sm">
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot blue mt-0.5">✓</span><span>XEOM Launcher · 毛玻璃桌面启动器</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot blue mt-0.5">✓</span><span>毛玻璃天气 / 笔记 / 音乐等垂直应用</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot blue mt-0.5">✓</span><span>主题与壁纸管理器</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot blue mt-0.5">✓</span><span>跨平台设计工具 / 小组件</span></li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap gap-2">
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(0,122,255,0.12);color:#007AFF;border:1px solid rgba(0,122,255,0.2)">启动器</span>
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(0,122,255,0.12);color:#007AFF;border:1px solid rgba(0,122,255,0.2)">独立 App</span>
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(0,122,255,0.12);color:#007AFF;border:1px solid rgba(0,122,255,0.2)">工具集</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统 -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8 fade-in fade-in-delay-3 group hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+                    <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-30" style="background:radial-gradient(circle,#BF5AF2,transparent)"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5" style="background:linear-gradient(135deg,rgba(191,90,242,0.25),rgba(191,90,242,0.1));border:1px solid rgba(191,90,242,0.3)">⚙️</div>
+                        <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color:#BF5AF2">Layer 03</div>
+                        <h3 class="text-xl sm:text-2xl font-bold mb-3" style="color:var(--text-main)">系统 · Systems</h3>
+                        <p class="text-muted text-sm sm:text-base leading-relaxed mb-5">
+                            最高层级的野心：基于自研模块与应用，打造整套毛玻璃 ROM / 操作系统体验。
+                            从启动、锁屏、桌面到系统应用，每一帧都通透、每一次交互都丝滑。
+                        </p>
+                        <ul class="space-y-2.5 text-sm">
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot purple mt-0.5">✓</span><span>XEOM OS · 毛玻璃定制 ROM（安卓侧）</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot purple mt-0.5">✓</span><span>iOS 端完整系统主题包</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot purple mt-0.5">✓</span><span>统一的设计系统与动效语言</span></li>
+                            <li class="flex items-start gap-2.5 text-muted"><span class="req-dot purple mt-0.5">✓</span><span>开源社区协同迭代</span></li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap gap-2">
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(191,90,242,0.12);color:#BF5AF2;border:1px solid rgba(191,90,242,0.2)">定制 ROM</span>
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(191,90,242,0.12);color:#BF5AF2;border:1px solid rgba(191,90,242,0.2)">系统主题</span>
+                            <span class="text-xs px-2.5 py-1 rounded-full" style="background:rgba(191,90,242,0.12);color:#BF5AF2;border:1px solid rgba(191,90,242,0.2)">设计系统</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 sm:mt-10 glass-card rounded-3xl p-5 sm:p-8 text-center fade-in fade-in-delay-3">
+                <p class="text-sm sm:text-base leading-relaxed" style="color:var(--text-main)">
+                    <span class="text-gradient font-bold">模块是基石，应用是窗口，系统是终局。</span><br class="hidden sm:block"/>
+                    三层相互支撑、共同迭代——我们用学生团队的执着，一层一层往上搭建属于 XEOM 的毛玻璃数字世界。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心团队 - 五组直接展示 -->
+    <section id="team" class="py-16 sm:py-20 px-4 sm:px-6">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-12 sm:mb-16 fade-in">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gradient">核心团队 · 五组</h2>
+                <p class="text-muted text-base sm:text-lg max-w-2xl mx-auto">五个职能小组紧密协作，共同打造极致毛玻璃美学体验。</p>
+            </div>
+            <div id="groupsContainer"></div>
+        </div>
+    </section>
+
+    <!-- 招募版块 -->
+    <section id="recruit" class="py-16 sm:py-24 px-4 sm:px-6 section-tinted">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-12 sm:mb-16 fade-in">
+                <div class="recruit-hero-badge">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    🎓 跨区域学生团队正在招募 · 欢迎热爱毛玻璃的你
+                </div>
+                <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold mb-4 sm:mb-6 text-gradient">加入 XEOM，一起创造极致</h2>
+                <p class="text-muted text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                    我们是一支<span class="text-gradient font-bold">跨城市、跨区域协作的纯学生团队</span>——不要求你在同一个城市，只要你有时间、有热情、有网络，线上就能一起做事。<br class="hidden sm:block"/>
+                    没有学历/年级门槛，高一新生到研究生都欢迎，无论你擅长魔改安卓、深谙 iOS 美学、还是刚入门想边学边做，XEOM 都有你的位置。
+                </p>
+            </div>
+
+            <!-- 招募卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mb-10 sm:mb-14">
+                <!-- 魔改安卓 -->
+                <div class="glass-card recruit-card android rounded-3xl fade-in fade-in-delay-1">
+                    <div class="recruit-icon-wrap" style="background:linear-gradient(135deg, #34C759, #30D158)">
+                        <span>🤖</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#34C759,#30D158)">魔改安卓工程师</h3>
+                    <p class="text-muted text-sm leading-relaxed mb-4" style="position:relative;z-index:1">
+                        热爱安卓系统定制与 ROM 魔改，能在原生基础上做出超越想象的视觉与功能体验，推动 XEOM 毛玻璃美学在安卓端落地。
+                    </p>
+                    <div style="position:relative;z-index:1">
+                        <span class="recruit-tag" style="background:rgba(52,199,89,0.15);color:#34C759">Android</span>
+                        <span class="recruit-tag" style="background:rgba(52,199,89,0.15);color:#34C759">ROM 定制</span>
+                        <span class="recruit-tag" style="background:rgba(52,199,89,0.15);color:#34C759">系统美化</span>
+                    </div>
+                    <ul class="skill-list">
+                        <li><span class="skill-check">✓</span>熟悉 Android Framework / Magisk / LSPosed 等魔改工具链</li>
+                        <li><span class="skill-check">✓</span>有 ROM 编译、反编译、SystemUI 修改、主题引擎开发经验</li>
+                        <li><span class="skill-check">✓</span>理解安卓渲染机制，能实现毛玻璃、高斯模糊等高级视觉效果</li>
+                        <li><span class="skill-check">✓</span>对 Substratum / KernelSU / 内核调教有实践经验者优先</li>
+                        <li><span class="skill-check">✓</span>有开源作品（GitHub/酷安）或发布过原创模块/ROM 者优先</li>
+                    </ul>
+                </div>
+
+                <!-- iOS 美学 -->
+                <div class="glass-card recruit-card ios rounded-3xl fade-in fade-in-delay-2">
+                    <div class="recruit-icon-wrap" style="background:linear-gradient(135deg, #007AFF, #5AC8FA)">
+                        <span>🍎</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#007AFF,#5AC8FA)">iOS 美学设计师</h3>
+                    <p class="text-muted text-sm leading-relaxed mb-4" style="position:relative;z-index:1">
+                        深谙 Apple 设计哲学，对 iOS / macOS 的毛玻璃、圆角、动效有深刻理解，能用设计语言复刻并超越原生级别的质感。
+                    </p>
+                    <div style="position:relative;z-index:1">
+                        <span class="recruit-tag" style="background:rgba(0,122,255,0.15);color:#007AFF">iOS</span>
+                        <span class="recruit-tag" style="background:rgba(0,122,255,0.15);color:#007AFF">UI/UX</span>
+                        <span class="recruit-tag" style="background:rgba(0,122,255,0.15);color:#007AFF">视觉设计</span>
+                    </div>
+                    <ul class="skill-list">
+                        <li><span class="skill-check">✓</span>精通 Figma / Sketch，能输出符合 iOS HIG 规范的高保真设计稿</li>
+                        <li><span class="skill-check">✓</span>理解毛玻璃（vibrancy）、动态模糊、层级景深等 iOS 视觉语言</li>
+                        <li><span class="skill-check">✓</span>对 SF Symbols、SwiftUI 动效、Spring 动画有研究和实操经验</li>
+                        <li><span class="skill-check">✓</span>熟悉 iOS 越狱美化（Snowboard / Xen HTML / 主题插件）者优先</li>
+                        <li><span class="skill-check">✓</span>有 Dribbble / Behance 作品集，或曾参与过 App 界面设计优先</li>
+                    </ul>
+                </div>
+
+                <!-- 其他通用人才 -->
+                <div class="glass-card recruit-card general rounded-3xl fade-in fade-in-delay-3">
+                    <div class="recruit-icon-wrap" style="background:linear-gradient(135deg, #AF52DE, #FF2D55)">
+                        <span>✨</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#AF52DE,#FF2D55)">通用创作伙伴</h3>
+                    <p class="text-muted text-sm leading-relaxed mb-4" style="position:relative;z-index:1">
+                        设计、前端、产品、动效、文案……只要你热爱毛玻璃美学、愿意一起打磨极致体验，我们都欢迎。
+                    </p>
+                    <div style="position:relative;z-index:1">
+                        <span class="recruit-tag" style="background:rgba(175,82,222,0.15);color:#AF52DE">前端</span>
+                        <span class="recruit-tag" style="background:rgba(175,82,222,0.15);color:#AF52DE">设计</span>
+                        <span class="recruit-tag" style="background:rgba(175,82,222,0.15);color:#AF52DE">产品</span>
+                    </div>
+                    <ul class="skill-list">
+                        <li><span class="skill-check">✓</span>前端方向：HTML/CSS/JS 扎实，熟悉 Tailwind / 动画 / 响应式开发</li>
+                        <li><span class="skill-check">✓</span>设计方向：有良好审美，对色彩、排版、动效节奏有自己的理解</li>
+                        <li><span class="skill-check">✓</span>产品方向：能独立完成需求分析、原型设计与体验走查</li>
+                        <li><span class="skill-check">✓</span>有开源项目、独立作品或相关实践经历者优先</li>
+                        <li><span class="skill-check">✓</span>最重要的是：热爱、靠谱、愿意一起把事情做好</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 加入CTA -->
+            <div class="join-cta-card fade-in fade-in-delay-4">
+                <div style="position:relative;z-index:1">
+                    <div class="text-4xl sm:text-5xl mb-4">🚀</div>
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-3 text-gradient">准备好了吗？</h3>
+                    <p class="text-muted text-base sm:text-lg mb-8 max-w-xl mx-auto leading-relaxed">
+                        点击下方按钮，一键加入 XEOM 工作室 QQ 群，<br class="hidden sm:block"/>
+                        和我们一起打造下一个极致毛玻璃作品。
+                    </p>
+                    <a href="https://qm.qq.com/q/eAUAe0275Y" target="_blank" rel="noopener noreferrer" class="join-big-btn">
+                        <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px"><path d="M12 2C6.48 2 2 6.04 2 11c0 2.52 1.17 4.78 3.03 6.37-.12.56-.48 2.03-.55 2.34-.09.4.15.4.32.29.13-.08 2.07-1.41 2.9-1.99 1.3.37 2.73.58 4.3.58 5.52 0 10-4.04 10-9s-4.48-9-10-9z"/></svg>
+                        一键加入群聊【XEOM工作室】
+                    </a>
+                    <p class="text-muted text-xs sm:text-sm mt-5 opacity-70">
+                        群链接：https://qm.qq.com/q/eAUAe0275Y · 期待你的到来 ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 投资人合作 -->
+    <section id="investor" class="py-16 sm:py-24 px-4 sm:px-6">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-12 sm:mb-16 fade-in">
+                <div class="investor-hero-badge">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    寻找天使投资人 · 共创毛玻璃美学未来
+                </div>
+                <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold mb-4 sm:mb-6 text-gradient">邀请有远见的你，与 XEOM 同行</h2>
+                <p class="text-muted text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                    XEOM 工作室成立于 2026 年 9 月 4 日，<br class="hidden sm:block"/>
+                    是一个<span class="text-gradient font-bold">跨城市、跨区域协作的学生团队</span>，正围绕"<span style="color:var(--accent-cyan);font-weight:600">模块 · 应用 · 系统</span>"三层产品体系稳步推进。
+                    我们正在寻找志同道合的天使投资人，共同推动项目从兴趣团队走向真正可用的产品。
+                </p>
+            </div>
+
+                        <!-- 致投资人的话 -->
+            <div class="glass-card rounded-3xl p-6 sm:p-10 mb-8 sm:mb-10 fade-in" style="background:linear-gradient(135deg, rgba(0,122,255,0.10), rgba(88,86,214,0.08))">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl" style="background:linear-gradient(135deg,#FF9500,#FF2D55);box-shadow:0 8px 24px rgba(255,45,85,0.3)">🎓</div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style="color:var(--text-main)">致看到这里的你 · 关于我们</h3>
+                        <p class="text-sm sm:text-base text-muted leading-relaxed mb-2">
+                            我们是一支<span style="color:var(--text-main);font-weight:600">跨城市、跨区域协作的纯学生团队</span>——团队成员分散在不同城市、不同省份，没有线下办公室，日常全靠线上会议、云端协作与深夜的语音连线推进项目。
+                            没有工资、没有启动资金，目前团队的云服务器、设计软件订阅、开发者账号都是成员自掏腰包凑出来的。
+                        </p>
+                        <p class="text-sm sm:text-base text-muted leading-relaxed">
+                            我们不奢望巨额融资，只希望能遇到一位<span class="text-gradient font-bold">愿意相信学生创造力的天使投资人</span>：
+                            一笔不多的启动资金、一些资源对接、甚至只是过来人的几句建议，都能让这群年轻人的作品走得更远、更稳。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- 资金用途/合作理念横幅 -->
+            <div class="glass-card investor-banner fade-in fade-in-delay-1 mb-10 sm:mb-14">
+                <div style="position:relative;z-index:1">
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
+                        <div class="text-5xl sm:text-6xl flex-shrink-0">💼</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#FF9500,#FF2D55)">
+                                为什么我们需要投资？
+                            </h3>
+                            <p class="text-muted leading-relaxed text-sm sm:text-base mb-0">
+                                XEOM 是一支<span style="color:var(--text-main);font-weight:600">由不同区域在校学生组成的跨地域创作团队</span>，核心五组志愿者线上协作、利用课余时间推进，目前已完成品牌视觉、设计规范与毛玻璃官网。下一阶段我们将沿"<span style="color:var(--accent-cyan);font-weight:600">模块 · 应用 · 系统</span>"三层路线稳步推进：
+                                <strong style="color:var(--text-main)">打磨跨端毛玻璃组件（模块层）、推出首款启动器/主题 App（应用层）、立项定制 ROM 与系统主题包（系统层）</strong>。
+                                这需要稳定的资金支撑云服务、开发设备、设计工具、分发渠道与跨区域沟通成本，让作品从"好看的 Demo"变成"真正被使用的产品"。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我们对投资人的期待 -->
+            <h3 class="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-center fade-in fade-in-delay-2">
+                <span class="text-gradient">我们期待这样的投资人</span>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mb-10 sm:mb-14">
+                <!-- 资金实力与资源 -->
+                <div class="glass-card investor-card resources rounded-3xl fade-in fade-in-delay-1">
+                    <div class="investor-icon-wrap" style="background:linear-gradient(135deg,#FF9500,#FFCC00)">
+                        <span>💰</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#FF9500,#FFCC00)">资金与资源支持</h3>
+                    <p class="text-muted text-sm leading-relaxed mb-4" style="position:relative;z-index:1">
+                        能为早期项目提供天使轮资金，并在后续资源对接上提供实质性帮助。
+                    </p>
+                    <ul class="req-list">
+                        <li><span class="req-dot orange">✓</span>具备天使/种子轮投资能力，预算灵活可谈</li>
+                        <li><span class="req-dot orange">✓</span>能提供云服务、分发渠道、法务等相关资源优先</li>
+                        <li><span class="req-dot orange">✓</span>有 TMT / 开发者工具 / 设计工具赛道经验加分</li>
+                        <li><span class="req-dot orange">✓</span>接受早期项目的不确定性，愿意陪跑 1-3 年</li>
+                    </ul>
+                </div>
+
+                <!-- 战略与经验 -->
+                <div class="glass-card investor-card strategy rounded-3xl fade-in fade-in-delay-2">
+                    <div class="investor-icon-wrap" style="background:linear-gradient(135deg,#5856D6,#AF52DE)">
+                        <span>🧭</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#5856D6,#AF52DE)">战略与经验加持</h3>
+                    <p class="text-muted text-sm leading-relaxed mb-4" style="position:relative;z-index:1">
+                        不只是出钱，更希望在商业模式、产品方向上给年轻团队真正有价值的建议。
+                    </p>
+                    <ul class="req-list">
+                        <li><span class="req-dot purple">✓</span>有互联网/科技领域创业或投资经验</li>
+                        <li><span class="req-dot purple">✓</span>能在商业化路径、品牌建设上提供清晰指导</li>
+                        <li><span class="req-dot purple">✓</span>理解设计驱动型产品的逻辑，尊重创作自由</li>
+                        <li><span class="req-dot purple">✓</span>具备产品审美，认可毛玻璃美学的长期价值</li>
+                    </ul>
+                </div>
+
+                <!-- 长期陪伴与理念认同 -->
+                <div class="glass-card investor-card longterm rounded-3xl fade-in fade-in-delay-3">
+                    <div class="investor-icon-wrap" style="background:linear-gradient(135deg,#34C759,#30D158)">
+                        <span>🤝</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#34C759,#30D158)">理念认同 · 长期同行</h3>
+                    <p class="text-muted text-sm leading-relaxed mb-4" style="position:relative;z-index:1">
+                        认同我们"极致美学 × 极致性能"的产品理念，愿意做长期陪跑者而非短期套利者。
+                    </p>
+                    <ul class="req-list">
+                        <li><span class="req-dot green">✓</span>真正认可并热爱毛玻璃/通透质感的设计哲学</li>
+                        <li><span class="req-dot green">✓</span>尊重年轻团队的创作热情，不做过度干涉</li>
+                        <li><span class="req-dot green">✓</span>愿意以开放、平等的沟通方式参与合作</li>
+                        <li><span class="req-dot green">✓</span>有耐心见证从 0 到 1 的打磨过程</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 我们能给投资人什么 -->
+            <h3 class="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-center fade-in fade-in-delay-3">
+                <span class="text-gradient">投资人将获得什么</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-10 sm:mb-14">
+                <div class="glass-card rounded-2xl p-5 sm:p-6 fade-in fade-in-delay-1">
+                    <div class="text-2xl sm:text-3xl mb-3">📈</div>
+                    <h4 class="font-bold mb-2 text-base sm:text-lg">股权回报</h4>
+                    <p class="text-muted text-xs sm:text-sm leading-relaxed">按投资金额获得对应股权比例，共享项目成长红利，未来融资/收购优先退出。</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 sm:p-6 fade-in fade-in-delay-2">
+                    <div class="text-2xl sm:text-3xl mb-3">🎨</div>
+                    <h4 class="font-bold mb-2 text-base sm:text-lg">品牌联名</h4>
+                    <p class="text-muted text-xs sm:text-sm leading-relaxed">投资人/机构品牌将在官网、产品鸣谢页显著露出，共享设计品牌势能。</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 sm:p-6 fade-in fade-in-delay-3">
+                    <div class="text-2xl sm:text-3xl mb-3">💡</div>
+                    <h4 class="font-bold mb-2 text-base sm:text-lg">产品优先体验</h4>
+                    <p class="text-muted text-xs sm:text-sm leading-relaxed">优先体验所有内测产品、主题包、UI 组件库，定制专属主题与界面。</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 sm:p-6 fade-in fade-in-delay-4">
+                    <div class="text-2xl sm:text-3xl mb-3">🗣️</div>
+                    <h4 class="font-bold mb-2 text-base sm:text-lg">决策参与权</h4>
+                    <p class="text-muted text-xs sm:text-sm leading-relaxed">重要战略节点可参与决策讨论，共同决定产品方向与商业化节奏。</p>
+                </div>
+            </div>
+
+            <!-- 投资人联系 CTA -->
+            <div class="investor-contact-card fade-in fade-in-delay-4">
+                <div style="position:relative;z-index:1">
+                    <div class="text-4xl sm:text-5xl mb-4">📩</div>
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-3 bg-clip-text text-transparent" style="background-image:linear-gradient(135deg,#FF9500,#FF2D55)">如果你认可我们，请联系我们</h3>
+                    <p class="text-muted text-base sm:text-lg mb-8 max-w-xl mx-auto leading-relaxed">
+                        无论你是天使投资人、独立 LP，还是有资源对接意向的朋友，<br class="hidden sm:block"/>
+                        都欢迎通过以下方式与我们深入沟通，我们会第一时间回复。
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6">
+                        <a href="https://qm.qq.com/q/eAUAe0275Y" target="_blank" rel="noopener noreferrer" class="investor-btn">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px"><path d="M12 2C6.48 2 2 6.04 2 11c0 2.52 1.17 4.78 3.03 6.37-.12.56-.48 2.03-.55 2.34-.09.4.15.4.32.29.13-.08 2.07-1.41 2.9-1.99 1.3.37 2.73.58 4.3.58 5.52 0 10-4.04 10-9s-4.48-9-10-9z"/></svg>
+                            QQ 群联系创始人
+                        </a>
+                        <a href="#recruit" class="ios-btn px-8 py-4 rounded-full font-bold text-base" style="border-color:rgba(175,82,222,0.35);color:#BF5AF2">
+                            同时招募成员中 →
+                        </a>
+                    </div>
+                    <p class="text-muted text-xs sm:text-sm opacity-70">
+                        合作通道：加入 QQ 群【XEOM工作室】后请@群主或管理员说明来意 · 期待与你共创 ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 未来愿景 -->
+    <section id="vision" class="py-16 sm:py-20 px-4 sm:px-6">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-10 sm:mb-12 text-center text-gradient fade-in">未来愿景</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                <div class="glass-card rounded-3xl p-6 sm:p-8 fade-in fade-in-delay-1">
+                    <div class="text-3xl mb-4">🎨</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-3">构建毛玻璃设计系统</h3>
+                    <p class="text-muted leading-relaxed text-sm sm:text-base">打造一套完整、可复用的毛玻璃 UI 组件库与设计规范，让通透质感成为数字产品的标准语言。</p>
+                </div>
+                <div class="glass-card rounded-3xl p-6 sm:p-8 fade-in fade-in-delay-2">
+                    <div class="text-3xl mb-4">📱</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-3">三端统一体验</h3>
+                    <p class="text-muted leading-relaxed text-sm sm:text-base">手机、平板、桌面三端体验深度统一，动效、布局、交互断点无缝衔接，一套设计处处精致。</p>
+                </div>
+                <div class="glass-card rounded-3xl p-6 sm:p-8 fade-in fade-in-delay-3">
+                    <div class="text-3xl mb-4">🚀</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-3">性能与美学兼得</h3>
+                    <p class="text-muted leading-relaxed text-sm sm:text-base">在保证 GPU 友好渲染的前提下追求极致视觉，不让毛玻璃成为性能负担，让美与快同时发生。</p>
+                </div>
+                <div class="glass-card rounded-3xl p-6 sm:p-8 fade-in fade-in-delay-4">
+                    <div class="text-3xl mb-4">🤝</div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-3">开放协作的团队文化</h3>
+                    <p class="text-muted leading-relaxed text-sm sm:text-base">五组架构灵活协作，尊重每一位成员的创意，用作品说话，让真正热爱设计与技术的人一起发光。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-10 text-center border-t px-4" style="color:var(--footer-text);border-color:var(--border-subtle)">
+        <p>&copy; 2026 XEOM 工作室. All rights reserved.</p>
+        <p class="mt-2">极致毛玻璃 · 追求卓越 · 创立于 2026.09.04</p>
+        <p class="mt-2 text-xs opacity-75">🎓 由一群来自<span class="text-gradient font-semibold">不同区域</span>的在校学生跨地域协作运营 · Made with ❤️ by Student Creators</p>
+        <p class="mt-1 text-[11px] opacity-60">🧩 模块 · 📱 应用 · ⚙️ 系统 — 三位一体，毛玻璃美学</p>
+    </footer>
+
+    <script>
+        // ================= 主题切换（白天/暗色模式） =================
+        const THEME_KEY = 'xeom_theme';
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIconDark = document.getElementById('themeIconDark');
+        const themeIconLight = document.getElementById('themeIconLight');
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            if (theme === 'light') {
+                themeIconDark.style.display = 'block';
+                themeIconLight.style.display = 'none';
+            } else {
+                themeIconDark.style.display = 'none';
+                themeIconLight.style.display = 'block';
+            }
+            localStorage.setItem(THEME_KEY, theme);
+        }
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+        applyTheme(savedTheme);
+        themeToggleBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // ================= 移动端菜单 =================
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+        // ================= 导航栏滚动效果 =================
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        // ================= 开屏动画 =================
+        const bootTexts = [
+            '正在初始化毛玻璃渲染引擎...',
+            '加载昼夜双主题配置...',
+            '连接跨区域协作网络...',
+            '载入模块 · 应用 · 系统三层体系...',
+            '载入核心五组成员数据...',
+            '校准动画曲线与缓动参数...',
+            '开放成员招募与投资合作通道...',
+            '系统准备就绪，欢迎使用 XEOM'
+        ];
+        const splashProgress = document.getElementById('splashProgress');
+        const bootText = document.getElementById('bootText');
+        const splashScreen = document.getElementById('splashScreen');
+        let progress = 0;
+        let textIdx = 0;
+        const bootInterval = setInterval(() => {
+            progress += Math.random() * 12 + 6;
+            if (progress > 100) progress = 100;
+            splashProgress.style.width = progress + '%';
+            const newIdx = Math.min(Math.floor(progress / 13), bootTexts.length - 1);
+            if (newIdx !== textIdx) {
+                textIdx = newIdx;
+                bootText.style.opacity = '0';
+                setTimeout(() => { bootText.textContent = bootTexts[textIdx]; bootText.style.opacity = '1'; }, 150);
+            }
+            if (progress >= 100) {
+                clearInterval(bootInterval);
+                setTimeout(() => splashScreen.classList.add('fade-out'), 500);
+                setTimeout(() => splashScreen.style.display = 'none', 1400);
+            }
+        }, 180);
+
+        // ================= 五组核心成员数据 =================
+        const GROUPS = [
+            {
+                id: 'core',
+                icon: '🏛️',
+                iconBg: 'linear-gradient(135deg, #007AFF, #5856D6)',
+                name: '核心创始组',
+                desc: '工作室方向与愿景的掌舵者',
+                members: [
+                    { avatar: 'XE', name: '创始人', role: '项目发起人', desc: 'XEOM 项目发起者，统筹工作室整体方向，对毛玻璃美学有近乎偏执的追求。', avatarBg: 'linear-gradient(135deg, #007AFF, #5856D6)' },
+                    { avatar: 'LY', name: '联合创始人', role: '战略与运营', desc: '负责工作室战略规划与日常运营协调，推动五组高效协作与项目落地。', avatarBg: 'linear-gradient(135deg, #5856D6, #AF52DE)' },
+                    { avatar: 'ZR', name: '技术总监', role: '技术架构', desc: '统筹技术架构选型，把控前端性能底线，确保毛玻璃效果在各端流畅运行。', avatarBg: 'linear-gradient(135deg, #34C759, #30D158)' }
+                ]
+            },
+            {
+                id: 'design',
+                icon: '🎨',
+                iconBg: 'linear-gradient(135deg, #FF9500, #FF2D55)',
+                name: '设计组',
+                desc: '视觉语言与美学体验的塑造者',
+                members: [
+                    { avatar: 'DS', name: '首席设计师', role: '设计负责人', desc: '主导 XEOM 整体视觉风格，定义毛玻璃组件规范、圆角曲率与色彩体系。', avatarBg: 'linear-gradient(135deg, #FF9500, #FF2D55)' },
+                    { avatar: 'UI', name: 'UI 设计师', role: '界面设计', desc: '专注界面细节与组件打磨，从卡片、按钮到导航栏，每一处阴影都精心雕琢。', avatarBg: 'linear-gradient(135deg, #FFCC00, #FF9500)' },
+                    { avatar: 'UX', name: 'UX 设计师', role: '交互体验', desc: '负责交互流程与动效设计，让每一次点击、滚动、切换都自然如呼吸。', avatarBg: 'linear-gradient(135deg, #FF2D55, #AF52DE)' }
+                ]
+            },
+            {
+                id: 'dev',
+                icon: '💻',
+                iconBg: 'linear-gradient(135deg, #34C759, #007AFF)',
+                name: '开发组',
+                desc: '将设计变为现实的技术匠人',
+                members: [
+                    { avatar: 'FD', name: '前端负责人', role: '前端架构', desc: '带领前端团队实现像素级还原，攻克毛玻璃、动画、响应式等技术难点。', avatarBg: 'linear-gradient(135deg, #34C759, #007AFF)' },
+                    { avatar: 'FE', name: '前端工程师', role: '界面开发', desc: '精通 HTML/CSS/JS 与 Tailwind，负责页面组件开发与动效落地实现。', avatarBg: 'linear-gradient(135deg, #5AC8FA, #007AFF)' },
+                    { avatar: 'AN', name: '动效工程师', role: '动画交互', desc: '专注 CSS/JS 动画实现，钻研缓动曲线与物理动效，让界面真正"活"起来。', avatarBg: 'linear-gradient(135deg, #30D158, #34C759)' }
+                ]
+            },
+            {
+                id: 'product',
+                icon: '📦',
+                iconBg: 'linear-gradient(135deg, #AF52DE, #FF2D55)',
+                name: '产品组',
+                desc: '用户体验与产品方向的把关者',
+                members: [
+                    { avatar: 'PM', name: '产品负责人', role: '产品经理', desc: '把控产品方向与体验细节，把设计理念转化为可落地的产品方案与迭代节奏。', avatarBg: 'linear-gradient(135deg, #AF52DE, #FF2D55)' },
+                    { avatar: 'UX', name: '体验研究员', role: '体验优化', desc: '深入研究用户使用习惯，通过数据与反馈持续打磨产品每一处细节体验。', avatarBg: 'linear-gradient(135deg, #5856D6, #AF52DE)' },
+                    { avatar: 'QC', name: '质量测试', role: '品质把控', desc: '不放过任何一个像素偏移与动画卡顿，确保最终交付的每一帧都符合标准。', avatarBg: 'linear-gradient(135deg, #FF3B30, #FF9500)' }
+                ]
+            },
+            {
+                id: 'new',
+                icon: '🌟',
+                iconBg: 'linear-gradient(135deg, #FFCC00, #34C759)',
+                name: '新成员',
+                desc: '工作室未来的希望与活力',
+                members: [
+                    { avatar: 'N1', name: '新锐设计师', role: '设计见习', desc: '热爱毛玻璃美学，正在系统学习 XEOM 设计规范，在实战中快速成长。', avatarBg: 'linear-gradient(135deg, #FFCC00, #FF9500)' },
+                    { avatar: 'N2', name: '新锐开发者', role: '开发见习', desc: '对前端技术充满热情，积极参与组件开发与动效调试，进步迅速。', avatarBg: 'linear-gradient(135deg, #5AC8FA, #34C759)' },
+                    { avatar: 'N3', name: '创意新成员', role: '创意支持', desc: '为团队带来新鲜想法与多元视角，参与头脑风暴与创意提案工作。', avatarBg: 'linear-gradient(135deg, #FF2D55, #FF9500)' }
+                ]
+            }
+        ];
+
+        // 渲染五组成员
+        const groupsContainer = document.getElementById('groupsContainer');
+        GROUPS.forEach((group, gIdx) => {
+            const section = document.createElement('div');
+            section.className = 'group-section fade-in';
+            if (gIdx === 0) section.classList.add('fade-in-delay-1');
+            else if (gIdx === 1) section.classList.add('fade-in-delay-2');
+            else if (gIdx === 2) section.classList.add('fade-in-delay-3');
+            else if (gIdx === 3) section.classList.add('fade-in-delay-4');
+            else section.classList.add('fade-in-delay-5');
+
+            let membersHTML = '';
+            group.members.forEach(m => {
+                membersHTML += `
+                    <div class="member-card">
+                        <div class="member-avatar" style="background:${m.avatarBg}">${m.avatar}</div>
+                        <div class="member-name">${m.name}</div>
+                        <div class="member-role">${m.role}</div>
+                        <p class="member-desc">${m.desc}</p>
+                    </div>
+                `;
+            });
+
+            section.innerHTML = `
+                <div class="group-header">
+                    <div class="group-icon" style="background:${group.iconBg}">${group.icon}</div>
+                    <div class="group-title-text">
+                        <h3>${group.name}</h3>
+                        <p>${group.desc}</p>
+                    </div>
+                </div>
+                <div class="member-grid">${membersHTML}</div>
+            `;
+            groupsContainer.appendChild(section);
+        });
+
+        // ================= 滚动淡入动画 =================
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
+<!--21105115702395614730100216--><!--21198250922395614730100216--><!--21609356002395614730100216--><!--21697473732573747210100216--><!--21788712052573747210100216--><!--21884001382573747210100216--><!--22385941722395614730100216--><!--22490310382395614730100216--><!--22585741522395614730100216--><!--22655011252395614730100216--><!--22852360822395614730100216--><!--23523197242573747210100216--><!--23629999282573747210100216--><!--23727885472573747210100216--><!--30820148612573747210100216--><!--31135282642395614730100216--><!--31737969382395614730100216--><!--32026353372573747210100216--><!--32131074532573747210100216--><!--32651915912395614730100216--><!--32755855182395614730100216--><!--32804589742395614730100216--><!--32987428372573747210100216--><!--33057141472573747210100216--><!--33325475962395614730100216--><!--33481963992395614730100216--><!--33647906242395614730100216--><!--33858676062395614730100216--><!--33938549242573747210100216--><!--34265500672395614730100216-->

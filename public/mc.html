@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MiniCraft · Java Edition Style</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#8ec5e8;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+  #c{display:block;width:100%;height:100%;touch-action:none;}
+  #hud{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:10;}
+
+  #cross{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;opacity:.85;}
+  #cross::before,#cross::after{content:"";position:absolute;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.85);}
+  #cross::before{left:50%;top:0;width:2px;height:100%;margin-left:-1px;}
+  #cross::after{top:50%;left:0;height:2px;width:100%;margin-top:-1px;}
+
+  #info{position:absolute;left:10px;top:8px;color:#fff;font-size:11.5px;line-height:1.55;
+    text-shadow:0 1px 4px rgba(0,0,0,.95);white-space:pre;
+    font-family:ui-monospace,Menlo,"SF Mono",monospace;}
+
+  .btn{position:absolute;pointer-events:auto;border-radius:50%;
+    background:rgba(255,255,255,.20);border:2px solid rgba(255,255,255,.62);
+    color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;
+    text-shadow:0 1px 4px rgba(0,0,0,.9);transition:background .07s,transform .07s;
+    touch-action:none;font-size:16px;}
+  .btn:active{background:rgba(255,255,255,.5);transform:scale(.93);}
+
+  #btnBreak{right:18px;bottom:18px;width:76px;height:76px;font-size:18px;
+    border-color:rgba(255,150,120,.88);background:rgba(190,70,55,.38);}
+  #btnPlace{right:18px;bottom:106px;width:64px;height:64px;
+    border-color:rgba(150,225,150,.88);background:rgba(65,145,75,.38);}
+  #btnJump{right:104px;bottom:18px;width:64px;height:64px;}
+
+  #bar{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
+    display:flex;gap:5px;padding:5px 7px;background:rgba(0,0,0,.22);border-radius:9px;}
+  .slot{pointer-events:auto;width:40px;height:40px;border:2px solid rgba(255,255,255,.4);
+    border-radius:7px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;
+    transition:transform .08s,border-color .08s;}
+  .slot.sel{border-color:#fff;background:rgba(255,255,255,.32);transform:translateY(-5px);}
+  .sw{width:25px;height:25px;border-radius:3px;box-shadow:inset 0 -9px 0 rgba(0,0,0,.22);}
+
+  #joy{position:absolute;pointer-events:none;width:116px;height:116px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.28);background:rgba(255,255,255,.09);display:none;}
+  #joyKnob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;
+    border-radius:50%;background:rgba(255,255,255,.36);border:2px solid rgba(255,255,255,.66);}
+
+  #tip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font-size:15px;
+    text-shadow:0 2px 10px #000;text-align:center;line-height:2;pointer-events:none;}
+
+  @media (max-width:620px){
+    .slot{width:34px;height:34px;}
+    .sw{width:21px;height:21px;}
+    #bar{bottom:78px;gap:4px;padding:4px 5px;}
+    #btnBreak{width:66px;height:66px;right:14px;bottom:14px;font-size:16px;}
+    #btnPlace{width:56px;height:56px;right:14px;bottom:88px;}
+    #btnJump{width:56px;height:56px;right:88px;bottom:14px;}
+    #info{font-size:10.5px;}
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="cross"></div>
+  <div id="info">初始化世界…</div>
+  <div id="joy"><div id="joyKnob"></div></div>
+  <div id="bar"></div>
+  <div id="btnJump"  class="btn">跳</div>
+  <div id="btnBreak" class="btn">挖</div>
+  <div id="btnPlace" class="btn">放</div>
+  <div id="tip">点击屏幕开始游玩</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   1. 世界常量 & 方块注册表
+   ===================================================================== */
+var CHUNK_W = 16;
+var CHUNK_H = 80;
+var WORLD_CX = 8;
+var WORLD_CZ = 8;
+var WORLD_W = CHUNK_W * WORLD_CX;   // 128
+var WORLD_D = CHUNK_W * WORLD_CZ;   // 128
+var SEA_LEVEL = 34;
+var CHUNK_N = WORLD_CX * WORLD_CZ;
+
+/* ---- 方块 ID ---- */
+var AIR=0, STONE=1, GRASS=2, DIRT=3, COBBLE=4, PLANKS=5, LOG=6,
+    LEAVES=7, SAND=8, WATER=9, BEDROCK=10, GLASS=11, BRICK=12, SNOW=13;
+
+/* ---- 方块定义（Java 命名 + 逐面颜色） ---- */
+var DEF = [];
+function D(id, name, top, side, bottom, opt){
+  opt = opt || {};
+  DEF[id] = {
+    id: id, name: name,
+    top: top, side: side, bottom: bottom,
+    opaque: opt.opaque !== undefined ? opt.opaque : true,
+    solid:  opt.solid  !== undefined ? opt.solid  : true
+  };
+}
+D(AIR,     'air',          null, null, null, {opaque:false, solid:false});
+D(STONE,   'stone',        [.60,.60,.62],[.53,.53,.55],[.50,.50,.52]);
+D(GRASS,   'grass_block',  [.34,.68,.25],[.46,.35,.22],[.48,.34,.20]);
+D(DIRT,    'dirt',         [.51,.36,.21],[.50,.35,.20],[.48,.34,.20]);
+D(COBBLE,  'cobblestone',  [.48,.48,.50],[.45,.45,.47],[.43,.43,.45]);
+D(PLANKS,  'oak_planks',   [.75,.61,.38],[.68,.54,.33],[.64,.50,.30]);
+D(LOG,     'oak_log',      [.71,.56,.35],[.42,.30,.18],[.71,.56,.35]);
+D(LEAVES,  'oak_leaves',   [.28,.63,.25],[.23,.53,.21],[.19,.45,.17]);
+D(SAND,    'sand',         [.89,.83,.59],[.85,.79,.55],[.82,.76,.52]);
+D(WATER,   'water',        [.24,.46,.84],[.21,.40,.76],[.18,.36,.70], {opaque:false, solid:false});
+D(BEDROCK, 'bedrock',      [.30,.30,.32],[.28,.28,.30],[.26,.26,.28]);
+D(GLASS,   'glass',        [.76,.86,.89],[.73,.83,.87],[.70,.80,.84], {opaque:false});
+D(BRICK,   'bricks',       [.63,.34,.29],[.58,.30,.26],[.54,.28,.24]);
+D(SNOW,    'snow_block',   [.95,.96,.98],[.93,.94,.96],[.90,.91,.93]);
+
+/* =====================================================================
+   2. 噪声
+   ===================================================================== */
+function hash2(x, y){
+  var h = (x|0) * 374761393 + (y|0) * 668265263;
+  h = (h ^ (h >> 13)) * 1274126177;
+  h = h ^ (h >> 16);
+  return (h >>> 0) / 4294967295;
+}
+function vnoise(x, y){
+  var xi = Math.floor(x), yi = Math.floor(y);
+  var xf = x - xi, yf = y - yi;
+  var u = xf * xf * (3 - 2 * xf);
+  var v = yf * yf * (3 - 2 * yf);
+  var a = hash2(xi, yi),     b = hash2(xi + 1, yi);
+  var c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1);
+  var ab = a + (b - a) * u;
+  var cd = c + (d - c) * u;
+  return ab + (cd - ab) * v;
+}
+function fbm(x, y, oct){
+  var total = 0, amp = 1, freq = 1, max = 0;
+  for (var i = 0; i < oct; i++){
+    total += vnoise(x * freq, y * freq) * amp;
+    max += amp;
+    amp *= 0.5;
+    freq *= 2.0;
+  }
+  return total / max;
+}
+
+/* =====================================================================
+   3. 世界存储 —— 分区块 Uint8Array
+   ===================================================================== */
+var chunkData   = new Array(CHUNK_N);
+var chunkVBO    = new Array(CHUNK_N);
+var chunkCount  = new Int32Array(CHUNK_N);
+var chunkDirty  = new Uint8Array(CHUNK_N);
+
+for (var i = 0; i < CHUNK_N; i++){
+  chunkData[i]  = new Uint8Array(CHUNK_W * CHUNK_W * CHUNK_H);
+  chunkVBO[i]   = null;
+  chunkCount[i] = 0;
+  chunkDirty[i] = 1;
+}
+
+/* 快速世界方块查询（热路径） */
+function getBlockAt(x, y, z){
+  if (x < 0 || x >= WORLD_W || z < 0 || z >= WORLD_D || y < 0 || y >= CHUNK_H) return AIR;
+  var ci = ((z >> 4) * WORLD_CX) + (x >> 4);
+  return chunkData[ci][(y << 8) | ((z & 15) << 4) | (x & 15)];
+}
+
+function isOpaqueAt(x, y, z){
+  if (x < 0 || x >= WORLD_W || z < 0 || z >= WORLD_D || y < 0 || y >= CHUNK_H) return false;
+  var ci = ((z >> 4) * WORLD_CX) + (x >> 4);
+  var id = chunkData[ci][(y << 8) | ((z & 15) << 4) | (x & 15)];
+  return DEF[id].opaque;
+}
+
+function setBlockAt(x, y, z, id){
+  if (x < 0 || x >= WORLD_W || z < 0 || z >= WORLD_D || y < 0 || y >= CHUNK_H) return;
+  var cx = x >> 4, cz = z >> 4;
+  var ci = cz * WORLD_CX + cx;
+  chunkData[ci][(y << 8) | ((z & 15) << 4) | (x & 15)] = id;
+  chunkDirty[ci] = 1;
+  var lx = x & 15, lz = z & 15;
+  if (lx === 0  && cx > 0)              chunkDirty[ci - 1] = 1;
+  if (lx === 15 && cx < WORLD_CX - 1)   chunkDirty[ci + 1] = 1;
+  if (lz === 0  && cz > 0)              chunkDirty[ci - WORLD_CX] = 1;
+  if (lz === 15 && cz < WORLD_CZ - 1)   chunkDirty[ci + WORLD_CX] = 1;
+}
+
+/* =====================================================================
+   4. 地形生成
+   ===================================================================== */
+function terrainHeight(wx, wz){
+  var base = fbm(wx * 0.0115, wz * 0.0115, 5);
+  var detail = fbm(wx * 0.048 + 77, wz * 0.048 + 133, 2);
+  var h = 22 + base * 36 + (detail - 0.5) * 5.0;
+  return Math.floor(h);
+}
+
+function plantTree(data, lx, ly, lz, seed){
+  var h = 4 + Math.floor(hash2(lx * 17 + seed, lz * 31 - seed) * 3);
+  var i, y;
+  for (i = 0; i < h; i++){
+    y = ly + i;
+    if (y < CHUNK_H) data[(y << 8) | (lz << 4) | lx] = LOG;
+  }
+  var topY = ly + h - 1;
+  for (var dy = -2; dy <= 1; dy++){
+    y = topY + dy;
+    if (y < 0 || y >= CHUNK_H) continue;
+    var r = (dy <= -1) ? 2 : 1;
+    for (var dx = -r; dx <= r; dx++){
+      for (var dz = -r; dz <= r; dz++){
+        if (dx === 0 && dz === 0 && dy < 0) continue;
+        if (Math.abs(dx) === r && Math.abs(dz) === r && dy >= 0) continue;
+        var nx = lx + dx, nz = lz + dz;
+        if (nx < 1 || nx > 14 || nz < 1 || nz > 14) continue;
+        var p = (y << 8) | (nz << 4) | nx;
+        if (data[p] === AIR) data[p] = LEAVES;
+      }
+    }
+  }
+  y = topY + 1;
+  if (y < CHUNK_H){
+    var q = (y << 8) | (lz << 4) | lx;
+    if (data[q] === AIR) data[q] = LEAVES;
+  }
+}
+
+function generateChunk(cx, cz){
+  var data = chunkData[cz * WORLD_CX + cx];
+  data.fill(0);
+  var baseX = cx * CHUNK_W, baseZ = cz * CHUNK_W;
+  var heights = new Int16Array(256);
+
+  for (var lz = 0; lz < 16; lz++){
+    for (var lx = 0; lx < 16; lx++){
+      var wx = baseX + lx, wz = baseZ + lz;
+      var h = terrainHeight(wx, wz);
+      if (h < 1) h = 1;
+      if (h >= CHUNK_H - 8) h = CHUNK_H - 9;
+      heights[(lz << 4) | lx] = h;
+
+      var underwater = h <= SEA_LEVEL;
+      var y;
+      for (y = 0; y <= h; y++){
+        var id;
+        if (y === 0)            id = BEDROCK;
+        else if (y === h)       id = underwater ? SAND : GRASS;
+        else if (y > h - 4)     id = underwater ? SAND : DIRT;
+        else                    id = STONE;
+        data[(y << 8) | (lz << 4) | lx] = id;
+      }
+      for (y = h + 1; y <= SEA_LEVEL; y++){
+        data[(y << 8) | (lz << 4) | lx] = WATER;
+      }
+    }
+  }
+
+  /* 种树 */
+  for (var tz = 3; tz < 13; tz++){
+    for (var tx = 3; tx < 13; tx++){
+      var tWX = baseX + tx, tWZ = baseZ + tz;
+      if (hash2(tWX * 91 + 13, tWZ * 57 + 29) > 0.984){
+        var th = heights[(tz << 4) | tx];
+        if (th > SEA_LEVEL + 1){
+          plantTree(data, tx, th + 1, tz, tWX * 7 + tWZ * 13);
+        }
+      }
+    }
+  }
+}
+
+/* =====================================================================
+   5. 网格构建（隐藏面剔除 + 顶点 AO）
+   ===================================================================== */
+var FACES = [
+  {dx: 1, dy: 0, dz: 0, shade:0.80, uAxis:2, vAxis:1,
+   corners:[[1,0,1],[1,0,0],[1,1,0],[1,1,1]]},
+  {dx:-1, dy: 0, dz: 0, shade:0.80, uAxis:2, vAxis:1,
+   corners:[[0,0,0],[0,0,1],[0,1,1],[0,1,0]]},
+  {dx: 0, dy: 1, dz: 0, shade:1.00, uAxis:0, vAxis:2,
+   corners:[[0,1,1],[1,1,1],[1,1,0],[0,1,0]]},
+  {dx: 0, dy:-1, dz: 0, shade:0.50, uAxis:0, vAxis:2,
+   corners:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]]},
+  {dx: 0, dy: 0, dz: 1, shade:0.66, uAxis:0, vAxis:1,
+   corners:[[0,0,1],[1,0,1],[1,1,1],[0,1,1]]},
+  {dx: 0, dy: 0, dz:-1, shade:0.66, uAxis:0, vAxis:1,
+   corners:[[1,0,0],[0,0,0],[0,1,0],[1,1,0]]}
+];
+var TRI = [0,1,2, 0,2,3];
+var AO_LUT = [0.55, 0.72, 0.87, 1.00];
+
+/* ---- 动态缓冲 ---- */
+function MeshBuf(){
+  this.cap = 8192 * 6;
+  this.buf = new Float32Array(this.cap);
+  this.len = 0;
+}
+MeshBuf.prototype.reset = function(){ this.len = 0; };
+MeshBuf.prototype.ensure = function(n){
+  if (this.len + n <= this.cap) return;
+  while (this.len + n > this.cap) this.cap <<= 1;
+  var nb = new Float32Array(this.cap);
+  nb.set(this.buf.subarray(0, this.len));
+  this.buf = nb;
+};
+MeshBuf.prototype.v = function(x,y,z,r,g,b){
+  var b_ = this.buf, l = this.len;
+  b_[l]=x; b_[l+1]=y; b_[l+2]=z;
+  b_[l+3]=r; b_[l+4]=g; b_[l+5]=b;
+  this.len = l + 6;
+};
+var MB = new MeshBuf();
+
+function vertexAO(nx, ny, nz, uAxis, vAxis, du, dv){
+  var ox = uAxis===0?du:0, oy = uAxis===1?du:0, oz = uAxis===2?du:0;
+  var px = vAxis===0?dv:0, py = vAxis===1?dv:0, pz = vAxis===2?dv:0;
+  var s1 = isOpaqueAt(nx+ox, ny+oy, nz+oz) ? 1 : 0;
+  var s2 = isOpaqueAt(nx+px, ny+py, nz+pz) ? 1 : 0;
+  var co = isOpaqueAt(nx+ox+px, ny+oy+py, nz+oz+pz) ? 1 : 0;
+  if (s1 && s2) return 0;
+  return 3 - (s1 + s2 + co);
+}
+
+function buildChunkMesh(ci){
+  var cx = ci % WORLD_CX, cz = (ci / WORLD_CX) | 0;
+  var data = chunkData[ci];
+  var baseX = cx * CHUNK_W, baseZ = cz * CHUNK_W;
+
+  MB.reset();
+
+  for (var y = 0; y < CHUNK_H; y++){
+    var yBase = y << 8;
+    for (var lz = 0; lz < 16; lz++){
+      var zBase = lz << 4;
+      for (var lx = 0; lx < 16; lx++){
+        var id = data[yBase | zBase | lx];
+        if (id === AIR) continue;
+        var def = DEF[id];
+        var wx = baseX + lx, wz = baseZ + lz;
+
+        for (var f = 0; f < 6; f++){
+          var F = FACES[f];
+          var nx = wx + F.dx, ny = y + F.dy, nz = wz + F.dz;
+          var nid = getBlockAt(nx, ny, nz);
+          if (DEF[nid].opaque) continue;
+          if (nid === id) continue;   // 同种半透明方块之间不画内部面
+
+          var c = (f === 2) ? def.top : (f === 3 ? def.bottom : def.side);
+          var sh = F.shade;
+          var cr = c[0] * sh, cg = c[1] * sh, cb = c[2] * sh;
+
+          var cn = F.corners, uA = F.uAxis, vA = F.vAxis;
+
+          MB.ensure(6 * 6);
+          for (var k = 0; k < 6; k++){
+            var p = cn[TRI[k]];
+            var du = (uA === 0 ? p[0] : uA === 1 ? p[1] : p[2]) ? 1 : -1;
+            var dv = (vA === 0 ? p[0] : vA === 1 ? p[1] : p[2]) ? 1 : -1;
+            var ao = AO_LUT[vertexAO(nx, ny, nz, uA, vA, du, dv)];
+            MB.v(wx + p[0], y + p[1], wz + p[2], cr * ao, cg * ao, cb * ao);
+          }
+        }
+      }
+    }
+  }
+
+  if (chunkVBO[ci]){ gl.deleteBuffer(chunkVBO[ci]); chunkVBO[ci] = null; }
+  chunkCount[ci] = 0;
+  if (MB.len === 0){ chunkDirty[ci] = 0; return; }
+
+  var vbo = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+  gl.bufferData(gl.ARRAY_BUFFER, MB.buf.subarray(0, MB.len), gl.STATIC_DRAW);
+  chunkVBO[ci] = vbo;
+  chunkCount[ci] = MB.len / 6;
+  chunkDirty[ci] = 0;
+}
+
+function flushDirtyChunks(budget){
+  var built = 0;
+  for (var i = 0; i < CHUNK_N; i++){
+    if (!chunkDirty[i]) continue;
+    buildChunkMesh(i);
+    if (++built >= budget) break;
+  }
+  return built;
+}
+
+/* =====================================================================
+   6. WebGL 初始化
+   ===================================================================== */
+var canvas = document.getElementById('c');
+var gl = canvas.getContext('webgl', {antialias:false, alpha:false, depth:true,
+                                     powerPreference:'high-performance'})
+      || canvas.getContext('experimental-webgl', {antialias:false, alpha:false});
+if (!gl){
+  document.getElementById('tip').textContent = '当前浏览器不支持 WebGL';
+  return;
+}
+
+var VS = [
+'attribute vec3 aPos;',
+'attribute vec3 aCol;',
+'uniform mat4 uProj;',
+'uniform mat4 uView;',
+'varying vec3 vCol;',
+'varying float vDist;',
+'void main(){',
+'  vCol = aCol;',
+'  vec4 vp = uView * vec4(aPos, 1.0);',
+'  vDist = -vp.z;',
+'  gl_Position = uProj * vp;',
+'}'].join('\n');
+
+var FS = [
+'precision mediump float;',
+'varying vec3 vCol;',
+'varying float vDist;',
+'void main(){',
+'  vec3 sky = vec3(0.557, 0.773, 0.910);',
+'  float fog = clamp((vDist - 55.0) / 55.0, 0.0, 1.0);',
+'  fog = fog * fog * (3.0 - 2.0 * fog);',
+'  gl_FragColor = vec4(mix(vCol, sky, fog * 0.92), 1.0);',
+'}'].join('\n');
+
+function compileShader(type, src){
+  var s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+var prog = gl.createProgram();
+gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
+  throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+
+var aPos  = gl.getAttribLocation(prog, 'aPos');
+var aCol  = gl.getAttribLocation(prog, 'aCol');
+var uProj = gl.getUniformLocation(prog, 'uProj');
+var uView = gl.getUniformLocation(prog, 'uView');
+gl.enableVertexAttribArray(aPos);
+gl.enableVertexAttribArray(aCol);
+
+/* ---- 动态分辨率 ---- */
+var quality = 1.0;
+var MAX_PIXELS = 2.0e6;
+
+function applySize(){
+  var w = window.innerWidth, h = window.innerHeight;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2.0);
+  var s = dpr * quality;
+  var px = w * h * s * s;
+  if (px > MAX_PIXELS) s *= Math.sqrt(MAX_PIXELS / px);
+  if (s < 0.35) s = 0.35;
+
+  canvas.width  = Math.max(1, Math.round(w * s));
+  canvas.height = Math.max(1, Math.round(h * s));
+  canvas.style.width  = w + 'px';
+  canvas.style.height = h + 'px';
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+window.addEventListener('resize', applySize);
+window.addEventListener('orientationchange', function(){ setTimeout(applySize, 220); });
+
+/* =====================================================================
+   7. 矩阵 / 视锥剔除
+   ===================================================================== */
+var mProj = new Float32Array(16);
+var mView = new Float32Array(16);
+var frustum = new Float32Array(24);
+
+function perspective(out, fovy, aspect, near, far){
+  var f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
+  out[0]=f/aspect; out[1]=0; out[2]=0;  out[3]=0;
+  out[4]=0; out[5]=f; out[6]=0;  out[7]=0;
+  out[8]=0; out[9]=0; out[10]=(far+near)*nf; out[11]=-1;
+  out[12]=0; out[13]=0; out[14]=2*far*near*nf; out[15]=0;
+}
+
+function computeFrustum(proj, view){
+  var m = new Float32Array(16);
+  for (var c = 0; c < 4; c++){
+    for (var r = 0; r < 4; r++){
+      var s = 0;
+      for (var k = 0; k < 4; k++) s += proj[k*4+r] * view[c*4+k];
+      m[c*4+r] = s;
+    }
+  }
+  function g(row, col){ return m[col*4 + row]; }
+  var P = frustum;
+  P[0]  = g(3,0)+g(0,0); P[1]  = g(3,1)+g(0,1); P[2]  = g(3,2)+g(0,2); P[3]  = g(3,3)+g(0,3);
+  P[4]  = g(3,0)-g(0,0); P[5]  = g(3,1)-g(0,1); P[6]  = g(3,2)-g(0,2); P[7]  = g(3,3)-g(0,3);
+  P[8]  = g(3,0)+g(1,0); P[9]  = g(3,1)+g(1,1); P[10] = g(3,2)+g(1,2); P[11] = g(3,3)+g(1,3);
+  P[12] = g(3,0)-g(1,0); P[13] = g(3,1)-g(1,1); P[14] = g(3,2)-g(1,2); P[15] = g(3,3)-g(1,3);
+  P[16] = g(3,0)+g(2,0); P[17] = g(3,1)+g(2,1); P[18] = g(3,2)+g(2,2); P[19] = g(3,3)+g(2,3);
+  P[20] = g(3,0)-g(2,0); P[21] = g(3,1)-g(2,1); P[22] = g(3,2)-g(2,2); P[23] = g(3,3)-g(2,3);
+
+  for (var i = 0; i < 6; i++){
+    var o = i * 4;
+    var len = Math.sqrt(P[o]*P[o] + P[o+1]*P[o+1] + P[o+2]*P[o+2]);
+    if (len > 1e-6){
+      P[o] /= len; P[o+1] /= len; P[o+2] /= len; P[o+3] /= len;
+    }
+  }
+}
+
+function boxInFrustum(minX, minY, minZ, maxX, maxY, maxZ){
+  for (var i = 0; i < 6; i++){
+    var o = i * 4;
+    var a = frustum[o], b = frustum[o+1], c = frustum[o+2], d = frustum[o+3];
+    var px = a > 0 ? maxX : minX;
+    var py = b > 0 ? maxY : minY;
+    var pz = c > 0 ? maxZ : minZ;
+    if (a*px + b*py + c*pz + d < 0) return false;
+  }
+  return true;
+}
+
+/* =====================================================================
+   8. 玩家
+   ===================================================================== */
+var P = {
+  x: WORLD_W / 2 + 0.5, y: 50, z: WORLD_D / 2 + 0.5,
+  vx: 0, vy: 0, vz: 0,
+  onGround: false, yaw: 0, pitch: -0.12
+};
+var PW = 0.3, PH = 1.8, EYE = 1.62;
+
+function collidesAt(px, py, pz){
+  var x0 = Math.floor(px - PW), x1 = Math.floor(px + PW);
+  var y0 = Math.floor(py),     y1 = Math.floor(py + PH - 0.001);
+  var z0 = Math.floor(pz - PW), z1 = Math.floor(pz + PW);
+  if (y1 < 0) return false;
+  if (y0 < 0) y0 = 0;
+  if (y0 >= CHUNK_H) return false;
+  for (var y = y0; y <= y1; y++){
+    if (y >= CHUNK_H) break;
+    for (var z = z0; z <= z1; z++){
+      for (var x = x0; x <= x1; x++){
+        var id = getBlockAt(x, y, z);
+        if (id !== AIR && DEF[id].solid) return true;
+      }
+    }
+  }
+  return false;
+}
+function collidesSelf(){ return collidesAt(P.x, P.y, P.z); }
+
+function isGrounded(){
+  var y = Math.floor(P.y - 0.06);
+  if (y < 0) return false;
+  var x0 = Math.floor(P.x - PW), x1 = Math.floor(P.x + PW);
+  var z0 = Math.floor(P.z - PW), z1 = Math.floor(P.z + PW);
+  for (var x = x0; x <= x1; x++)
+    for (var z = z0; z <= z1; z++){
+      var id = getBlockAt(x, y, z);
+      if (id !== AIR && DEF[id].solid) return true;
+    }
+  return false;
+}
+
+function moveWithCollision(dx, dy, dz){
+  var maxC = Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dz));
+  var steps = Math.max(1, Math.ceil(maxC / 0.18));
+  var sx = dx / steps, sy = dy / steps, sz = dz / steps;
+  for (var i = 0; i < steps; i++){
+    if (sx !== 0){ P.x += sx; if (collidesSelf()){ P.x -= sx; P.vx = 0; } }
+    if (sz !== 0){ P.z += sz; if (collidesSelf()){ P.z -= sz; P.vz = 0; } }
+    if (sy !== 0){
+      P.y += sy;
+      if (collidesSelf()){
+        P.y -= sy;
+        if (sy < 0) P.onGround = true;
+        P.vy = 0;
+      }
+    }
+  }
+}
+
+function findSpawn(){
+  var bx = (WORLD_W / 2) | 0, bz = (WORLD_D / 2) | 0;
+  for (var y = CHUNK_H - 1; y >= 0; y--){
+    var id = getBlockAt(bx, y, bz);
+    if (id !== AIR && DEF[id].solid){
+      P.x = bx + 0.5; P.z = bz + 0.5; P.y = y + 1.02;
+      return;
+    }
+  }
+}
+
+/* =====================================================================
+   9. 射线拾取（DDA）
+   ===================================================================== */
+function raycast(maxDist){
+  var ox = P.x, oy = P.y + EYE, oz = P.z;
+  var cy = Math.cos(P.yaw), sy = Math.sin(P.yaw);
+  var cp = Math.cos(P.pitch), sp = Math.sin(P.pitch);
+  var dx = -sy * cp, dy = sp, dz = -cy * cp;
+
+  var x = Math.floor(ox), y = Math.floor(oy), z = Math.floor(oz);
+  var stepX = dx > 0 ? 1 : (dx < 0 ? -1 : 0);
+  var stepY = dy > 0 ? 1 : (dy < 0 ? -1 : 0);
+  var stepZ = dz > 0 ? 1 : (dz < 0 ? -1 : 0);
+
+  var INF = 1e30;
+  var tdx = dx !== 0 ? Math.abs(1/dx) : INF;
+  var tdy = dy !== 0 ? Math.abs(1/dy) : INF;
+  var tdz = dz !== 0 ? Math.abs(1/dz) : INF;
+  var tmx = dx !== 0 ? ((stepX > 0 ? x+1-ox : x-ox) / dx) : INF;
+  var tmy = dy !== 0 ? ((stepY > 0 ? y+1-oy : y-oy) / dy) : INF;
+  var tmz = dz !== 0 ? ((stepZ > 0 ? z+1-oz : z-oz) / dz) : INF;
+
+  var nx = 0, ny = 0, nz = 0, t = 0, guard = 0;
+
+  while (guard++ < 320){
+    var id = getBlockAt(x, y, z);
+    if (id !== AIR && DEF[id].solid && !DEF[id].liquid){
+      return { hit:true, x:x, y:y, z:z, nx:nx, ny:ny, nz:nz };
+    }
+    if (tmx < tmy && tmx < tmz){
+      x += stepX; t = tmx; tmx += tdx; nx = -stepX; ny = 0; nz = 0;
+    } else if (tmy < tmz){
+      y += stepY; t = tmy; tmy += tdy; nx = 0; ny = -stepY; nz = 0;
+    } else {
+      z += stepZ; t = tmz; tmz += tdz; nx = 0; ny = 0; nz = -stepZ;
+    }
+    if (t > maxDist) break;
+  }
+  return { hit:false };
+}
+
+/* =====================================================================
+   10. 破坏 / 放置
+   ===================================================================== */
+var state = { keys:{}, tf:0, ts:0, selected: GRASS };
+
+function blockIntersectsPlayer(bx, by, bz){
+  return (bx + 1 > P.x - PW && bx < P.x + PW &&
+          by + 1 > P.y      && by < P.y + PH &&
+          bz + 1 > P.z - PW && bz < P.z + PW);
+}
+
+function doBreak(){
+  var r = raycast(6.5);
+  if (!r.hit) return;
+  if (r.y === 0) return;                 // 基岩不可破坏
+  setBlockAt(r.x, r.y, r.z, AIR);
+  flushDirtyChunks(8);
+}
+
+function doPlace(){
+  var r = raycast(6.5);
+  if (!r.hit) return;
+  var px = r.x + r.nx, py = r.y + r.ny, pz = r.z + r.nz;
+  if (px < 0 || px >= WORLD_W || py < 0 || py >= CHUNK_H || pz < 0 || pz >= WORLD_D) return;
+  if (getBlockAt(px, py, pz) !== AIR) return;
+  if (blockIntersectsPlayer(px, py, pz)) return;
+  setBlockAt(px, py, pz, state.selected);
+  flushDirtyChunks(8);
+}
+
+function doJump(){
+  if (P.onGround){ P.vy = 8.7; P.onGround = false; }
+}
+
+/* =====================================================================
+   11. 输入
+   ===================================================================== */
+function clampPitch(){
+  var lim = Math.PI / 2 - 0.02;
+  if (P.pitch >  lim) P.pitch =  lim;
+  if (P.pitch < -lim) P.pitch = -lim;
+}
+
+var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+window.addEventListener('keydown', function(e){
+  state.keys[e.code] = true;
+  if (e.code === 'Space'){ e.preventDefault(); doJump(); }
+  var map = {Digit1:GRASS,Digit2:DIRT,Digit3:STONE,Digit4:COBBLE,
+             Digit5:LOG,Digit6:LEAVES,Digit7:SAND,Digit8:PLANKS,Digit9:GLASS};
+  if (map[e.code] !== undefined){ state.selected = map[e.code]; buildBar(); }
+});
+window.addEventListener('keyup', function(e){ state.keys[e.code] = false; });
+
+/* ---- 鼠标（桌面端） ---- */
+var pointerLocked = false;
+document.addEventListener('pointerlockchange', function(){
+  pointerLocked = (document.pointerLockElement === canvas);
+  var tip = document.getElementById('tip');
+  if (tip) tip.style.display = pointerLocked ? 'none' : '';
+});
+
+if (!isTouch){
+  canvas.addEventListener('click', function(){
+    if (!pointerLocked && canvas.requestPointerLock) canvas.requestPointerLock();
+  });
+  document.addEventListener('mousemove', function(e){
+    if (!pointerLocked) return;
+    P.yaw   -= e.movementX * 0.0024;
+    P.pitch -= e.movementY * 0.0024;
+    clampPitch();
+  });
+  document.addEventListener('mousedown', function(e){
+    if (!pointerLocked) return;
+    if (e.button === 0) doBreak();
+    else if (e.button === 2) doPlace();
+  });
+  canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+} else {
+  var tipEl = document.getElementById('tip');
+  if (tipEl) tipEl.style.display = 'none';
+}
+
+/* ---- 触摸 ---- */
+var joyEl = document.getElementById('joy');
+var joyKnob = document.getElementById('joyKnob');
+var lookId = null, lookLX = 0, lookLY = 0;
+var moveId = null, joyOX = 0, joyOY = 0;
+var JOY_R = 50;
+
+function showJoy(cx, cy){
+  joyOX = cx; joyOY = cy;
+  joyEl.style.display = 'block';
+  joyEl.style.left = (cx - 58) + 'px';
+  joyEl.style.top  = (cy - 58) + 'px';
+  joyKnob.style.left = '50%';
+  joyKnob.style.top  = '50%';
+}
+function hideJoy(){
+  joyEl.style.display = 'none';
+  state.tf = 0; state.ts = 0;
+}
+
+canvas.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  for (var i = 0; i < e.changedTouches.length; i++){
+    var t = e.changedTouches[i];
+    var tx = t.clientX, ty = t.clientY;
+    if (moveId === null && tx < window.innerWidth * 0.45 && ty > window.innerHeight * 0.42){
+      moveId = t.identifier; showJoy(tx, ty);
+    } else if (lookId === null){
+      lookId = t.identifier; lookLX = tx; lookLY = ty;
+    }
+  }
+}, {passive:false});
+
+canvas.addEventListener('touchmove', function(e){
+  e.preventDefault();
+  for (var i = 0; i < e.changedTouches.length; i++){
+    var t = e.changedTouches[i];
+    if (t.identifier === moveId){
+      var dx = t.clientX - joyOX, dy = t.clientY - joyOY;
+      var len = Math.sqrt(dx*dx + dy*dy);
+      if (len > JOY_R){ dx = dx/len*JOY_R; dy = dy/len*JOY_R; }
+      joyKnob.style.left = (58 + dx) + 'px';
+      joyKnob.style.top  = (58 + dy) + 'px';
+      state.ts =  dx / JOY_R;
+      state.tf = -dy / JOY_R;
+    } else if (t.identifier === lookId){
+      var mdx = t.clientX - lookLX, mdy = t.clientY - lookLY;
+      lookLX = t.clientX; lookLY = t.clientY;
+      P.yaw   -= mdx * 0.0060;
+      P.pitch -= mdy * 0.0060;
+      clampPitch();
+    }
+  }
+}, {passive:false});
+
+function endTouch(e){
+  for (var i = 0; i < e.changedTouches.length; i++){
+    var t = e.changedTouches[i];
+    if (t.identifier === moveId){ moveId = null; hideJoy(); }
+    else if (t.identifier === lookId){ lookId = null; }
+  }
+}
+canvas.addEventListener('touchend', endTouch, {passive:false});
+canvas.addEventListener('touchcancel', endTouch, {passive:false});
+
+/* ---- HUD 按钮 ---- */
+function bindBtn(id, onDown, repeatMs){
+  var el = document.getElementById(id);
+  if (!el) return;
+  var timer = null;
+  function down(e){
+    if (e){ e.preventDefault(); e.stopPropagation(); }
+    onDown();
+    if (repeatMs) timer = setInterval(onDown, repeatMs);
+  }
+  function up(e){
+    if (e){ e.preventDefault(); e.stopPropagation(); }
+    if (timer){ clearInterval(timer); timer = null; }
+  }
+  el.addEventListener('touchstart', down, {passive:false});
+  el.addEventListener('touchend', up, {passive:false});
+  el.addEventListener('touchcancel', up, {passive:false});
+  el.addEventListener('mousedown', down);
+  el.addEventListener('mouseup', up);
+  el.addEventListener('mouseleave', up);
+}
+bindBtn('btnBreak', doBreak, 220);
+bindBtn('btnPlace', doPlace, 0);
+bindBtn('btnJump',  doJump,  0);
+
+/* ---- 物品栏 ---- */
+var BAR_ITEMS = [GRASS, DIRT, STONE, COBBLE, LOG, LEAVES, SAND, PLANKS, GLASS];
+var barEl = document.getElementById('bar');
+
+function buildBar(){
+  barEl.innerHTML = '';
+  for (var i = 0; i < BAR_ITEMS.length; i++){
+    (function(type){
+      var slot = document.createElement('div');
+      slot.className = 'slot' + (type === state.selected ? ' sel' : '');
+      var sw = document.createElement('div');
+      sw.className = 'sw';
+      var c = DEF[type].top;
+      sw.style.background = 'rgb(' + Math.round(c[0]*255) + ',' +
+                                     Math.round(c[1]*255) + ',' +
+                                     Math.round(c[2]*255) + ')';
+      slot.appendChild(sw);
+      slot.addEventListener('touchstart', function(e){
+        e.preventDefault(); e.stopPropagation();
+        state.selected = type; buildBar();
+      }, {passive:false});
+      slot.addEventListener('mousedown', function(e){
+        e.stopPropagation();
+        state.selected = type; buildBar();
+      });
+      barEl.appendChild(slot);
+    })(BAR_ITEMS[i]);
+  }
+}
+
+/* =====================================================================
+   12. 帧率统计
+   ===================================================================== */
+var frameTimes = [];
+var fps = 0, frameMs = 0, fpsMin = 9999, fpsMax = 0;
+var infoEl = document.getElementById('info');
+
+function recordFrame(nowMs){
+  frameTimes.push(nowMs);
+  if (frameTimes.length > 60) frameTimes.shift();
+  if (frameTimes.length > 2){
+    var span = frameTimes[frameTimes.length-1] - frameTimes[0];
+    if (span > 0){
+      fps = (frameTimes.length - 1) * 1000 / span;
+      frameMs = span / (frameTimes.length - 1);
+    }
+  }
+}
+
+/* =====================================================================
+   13. 更新 / 渲染
+   ===================================================================== */
+function update(dt){
+  var kf = 0, ks = 0, K = state.keys;
+  if (K['KeyW'] || K['ArrowUp'])    kf += 1;
+  if (K['KeyS'] || K['ArrowDown'])  kf -= 1;
+  if (K['KeyD'] || K['ArrowRight']) ks += 1;
+  if (K['KeyA'] || K['ArrowLeft'])  ks -= 1;
+
+  if (Math.abs(state.tf) > 0.08 || Math.abs(state.ts) > 0.08){
+    kf = state.tf; ks = state.ts;
+  }
+  var len = Math.sqrt(kf*kf + ks*ks);
+  if (len > 1){ kf /= len; ks /= len; }
+
+  var cy = Math.cos(P.yaw), sy = Math.sin(P.yaw);
+  var wx = (-sy)*kf + cy*ks;
+  var wz = (-cy)*kf + (-sy)*ks;
+
+  var SPEED = 4.8;
+  var accel = P.onGround ? 15 : 5;
+  P.vx += (wx * SPEED - P.vx) * Math.min(1, accel * dt);
+  P.vz += (wz * SPEED - P.vz) * Math.min(1, accel * dt);
+
+  P.vy -= 26 * dt;
+  if (P.vy < -34) P.vy = -34;
+
+  P.onGround = false;
+  moveWithCollision(P.vx * dt, P.vy * dt, P.vz * dt);
+
+  if (!P.onGround && P.vy <= 0 && isGrounded()){ P.onGround = true; P.vy = 0; }
+  if (P.y < 0.5){ P.y = 0.5; P.vy = 0; P.onGround = true; }
+  if (P.y > CHUNK_H + 10){ P.y = CHUNK_H + 10; P.vy = 0; }
+
+  /* 限制在世界边界内 */
+  if (P.x < PW) P.x = PW;
+  if (P.x > WORLD_W - PW) P.x = WORLD_W - PW;
+  if (P.z < PW) P.z = PW;
+  if (P.z > WORLD_D - PW) P.z = WORLD_D - PW;
+}
+
+function render(){
+  var aspect = canvas.width / Math.max(1, canvas.height);
+  perspective(mProj, Math.PI / 180 * 72, aspect, 0.08, 220);
+
+  var cy = Math.cos(P.yaw), sy = Math.sin(P.yaw);
+  var cp = Math.cos(P.pitch), sp = Math.sin(P.pitch);
+
+  var fx = -sy * cp, fy = sp, fz = -cy * cp;
+  var rx = cy, ry = 0, rz = -sy;
+  var ux = ry*fz - rz*fy;
+  var uy = rz*fx - rx*fz;
+  var uz = rx*fy - ry*fx;
+
+  var ex = P.x, ey = P.y + EYE, ez = P.z;
+
+  var v = mView;
+  v[0]=rx;  v[4]=ry;  v[8] =rz;
+  v[1]=ux;  v[5]=uy;  v[9] =uz;
+  v[2]=-fx; v[6]=-fy; v[10]=-fz;
+  v[3]=0;   v[7]=0;   v[11]=0;
+  v[12]=-(rx*ex + ry*ey + rz*ez);
+  v[13]=-(ux*ex + uy*ey + uz*ez);
+  v[14]= (fx*ex + fy*ey + fz*ez);
+  v[15]=1;
+
+  computeFrustum(mProj, mView);
+
+  gl.clearColor(0.557, 0.773, 0.910, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
+  gl.depthFunc(gl.LEQUAL);
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.BACK);
+  gl.frontFace(gl.CCW);
+
+  gl.useProgram(prog);
+  gl.uniformMatrix4fv(uProj, false, mProj);
+  gl.uniformMatrix4fv(uView, false, mView);
+
+  gl.enableVertexAttribArray(aPos);
+  gl.enableVertexAttribArray(aCol);
+
+  /* ---- 视锥剔除 + 距离剔除 ---- */
+  var MAX_DIST = 130;
+  var drawn = 0;
+
+  for (var i = 0; i < CHUNK_N; i++){
+    if (!chunkVBO[i] || chunkCount[i] === 0) continue;
+
+    var cx = i % WORLD_CX, cz = (i / WORLD_CX) | 0;
+    var minX = cx * 16, minZ = cz * 16;
+    var maxX = minX + 16, maxZ = minZ + 16;
+
+    /* 距离剔除 */
+    var cxm = minX + 8, czm = minZ + 8;
+    var ddx = cxm - ex, ddz = czm - ez;
+    if (ddx*ddx + ddz*ddz > MAX_DIST * MAX_DIST) continue;
+
+    /* 视锥剔除 */
+    if (!boxInFrustum(minX, 0, minZ, maxX, CHUNK_H, maxZ)) continue;
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, chunkVBO[i]);
+    gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(aCol, 3, gl.FLOAT, false, 24, 12);
+    gl.drawArrays(gl.TRIANGLES, 0, chunkCount[i]);
+    drawn++;
+  }
+  return drawn;
+}
+
+/* =====================================================================
+   14. 主循环
+   ===================================================================== */
+var lastTime = 0, infoTimer = 0, resTimer = 0, drawnChunks = 0;
+
+function loop(now){
+  if (!lastTime) lastTime = now;
+  var dt = (now - lastTime) / 1000;
+  lastTime = now;
+  if (dt > 0.08) dt = 0.08;
+
+  recordFrame(now);
+  update(dt);
+  drawnChunks = render();
+
+  /* ---- 动态分辨率（真实 FPS 驱动） ---- */
+  resTimer += dt;
+  if (resTimer > 1.6){
+    resTimer = 0;
+    if (fps > 0){
+      if (fps < 45 && quality > 0.5){
+        quality = Math.max(0.5, quality * 0.85);
+        applySize(); frameTimes.length = 0;
+      } else if (fps > 57 && quality < 1.0){
+        quality = Math.min(1.0, quality * 1.08);
+        applySize(); frameTimes.length = 0;
+      }
+    }
+  }
+
+  /* ---- HUD ---- */
+  infoTimer += dt;
+  if (infoTimer >= 0.35){
+    infoTimer = 0;
+    if (fps > 0){
+      if (fps < fpsMin) fpsMin = fps;
+      if (fps > fpsMax) fpsMax = fps;
+    }
+    infoEl.textContent =
+      'XYZ   ' + P.x.toFixed(1) + ' / ' + P.y.toFixed(1) + ' / ' + P.z.toFixed(1) + '\n' +
+      'Yaw   ' + ((P.yaw * 57.2958) % 360).toFixed(0) + '°   Pitch ' + (P.pitch * 57.2958).toFixed(0) + '°\n' +
+      '手持  ' + DEF[state.selected].name + '\n' +
+      'FPS   ' + fps.toFixed(1) + '  (' + frameMs.toFixed(1) + ' ms)\n' +
+      '低/高 ' + fpsMin.toFixed(0) + ' / ' + fpsMax.toFixed(0) + '\n' +
+      '区块  ' + drawnChunks + ' / ' + CHUNK_N + ' 渲染\n' +
+      '画面  ' + canvas.width + '×' + canvas.height + '  Q=' + quality.toFixed(2);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* =====================================================================
+   15. 启动
+   ===================================================================== */
+function boot(){
+  applySize();
+
+  /* 生成全部区块数据 */
+  for (var cz = 0; cz < WORLD_CZ; cz++)
+    for (var cx = 0; cx < WORLD_CX; cx++)
+      generateChunk(cx, cz);
+
+  /* 一次性构建所有区块网格（预加载） */
+  for (var i = 0; i < CHUNK_N; i++) buildChunkMesh(i);
+
+  findSpawn();
+  P.yaw = 0;
+  P.pitch = -0.12;
+
+  buildBar();
+
+  if (!isTouch){
+    document.getElementById('tip').innerHTML =
+      '点击画面 → 锁定鼠标<br>' +
+      'WASD 移动 / 空格跳跃<br>' +
+      '左键挖 / 右键放 / 数字键 1-9 切换方块';
+  } else {
+    document.getElementById('tip').style.display = 'none';
+  }
+
+  requestAnimationFrame(loop);
+}
+
+boot();
+
+})();
+</script>
+</body>
+</html>

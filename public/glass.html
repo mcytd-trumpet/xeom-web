@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>液态玻璃 · SXRE</title>
+<script src="/static/Liquidglass.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #d2d7df;
+  }
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #1a1f2e;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform .2s, background .2s;
+  }
+  .back-link:hover { transform: scale(1.05); background: rgba(255,255,255,0.4); }
+
+  /* 主容器：不再用会吞掉子元素的 flex+wrap */
+  .glass-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  liquid-glass {
+    box-shadow: none;
+    border-radius: 28px;
+    overflow: hidden;
+  }
+
+  .footnote {
+    margin-top: 40px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(0,0,0,0.3);
+    padding: 10px 22px;
+    border-radius: 60px;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<a href="/" class="back-link">← 返回 SXRE</a>
+
+<div class="glass-grid">
+  <!-- 单个 toggle 开关 -->
+  <liquid-glass
+    mode="single-toggle"
+    wallpaper="gradient"
+    style="width:120px;height:50px;border-radius:28px;overflow:hidden;">
+  </liquid-glass>
+
+  <!-- 底部标签栏（id 由下面脚本控制 tabs） -->
+  <liquid-glass
+    id="my-tabs"
+    mode="single-bottom-tabs"
+    wallpaper="gradient"
+    style="width:340px;height:300px;border-radius:32px;overflow:hidden;">
+  </liquid-glass>
+
+  <!-- 滚动容器（原来被注释，现在拿出来） -->
+  <liquid-glass
+    mode="scroll-container"
+    wallpaper="gradient"
+    style="width:250px;height:300px;border-radius:28px;overflow:hidden;">
+  </liquid-glass>
+</div>
+
+<div class="footnote">SXRE × Liquid Glass · 液态玻璃组件演示</div>
+
+<script>
+  (function () {
+    var el = document.getElementById('my-tabs');
+    if (!el) return;
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      if (customElements.get('liquid-glass')) {
+        clearInterval(timer);
+        requestAnimationFrame(function () {
+          try {
+            if (typeof el.setTabs === 'function') {
+              el.setTabs([[
+                { icon: '', label: '首页', viewport: 24 },
+                { icon: '', label: '发现', viewport: 24 },
+                { icon: '⭐', label: '收藏', viewport: 24 }
+              ]]);
+            }
+          } catch (e) {
+            console.warn('setTabs failed:', e);
+          }
+        });
+      } else if (tries > 50) {
+        clearInterval(timer);
+        console.warn('liquid-glass 组件未在 5 秒内注册');
+      }
+    }, 100);
+  })();
+</script>
+</body>
+</html>
