@@ -8,10 +8,12 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    'daphne',
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.staticfiles",
     "core",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -31,6 +33,15 @@ TEMPLATES = [{
 }]
 
 WSGI_APPLICATION = "sxre.wsgi.application"
+ASGI_APPLICATION = "sxre.asgi.application"
+
+# ---- Channels 频道层 ----
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("127.0.0.1", 6379)]},
+    },
+}
 
 DATABASES = {
     "default": {

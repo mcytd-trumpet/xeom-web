@@ -1,0 +1,2215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MiniCraft · Bedrock</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;}
+#c{display:block;width:100%;height:100%;touch-action:none;}
+
+/* ====== 通用 ====== */
+.screen{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;}
+.screen.on{display:flex;}
+.panel{width:min(440px,94vw);max-height:92vh;overflow-y:auto;padding:16px;
+  background:#1d1d1d;border:2px solid #3c3c3c;border-radius:4px;
+  box-shadow:0 10px 40px rgba(0,0,0,.85);}
+.panel::-webkit-scrollbar{width:6px;}
+.panel::-webkit-scrollbar-thumb{background:#4c4c4c;border-radius:3px;}
+.title{font-size:19px;font-weight:700;text-align:center;letter-spacing:2px;color:#fff;
+  text-shadow:2px 2px 0 #000;margin-bottom:14px;}
+.btn{display:block;width:100%;padding:11px 12px;margin-bottom:8px;cursor:pointer;
+  background:#4c4c4c;border:2px solid #6a6a6a;border-radius:3px;color:#fff;
+  font-size:14.5px;font-weight:600;text-align:center;letter-spacing:1px;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 3px 0 #2a2a2a;
+  transition:transform .05s;font-family:inherit;}
+.btn:active{transform:translateY(2px);box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 1px 0 #2a2a2a;}
+.btn.primary{background:#3c8527;border-color:#5aad3c;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 3px 0 #245018;}
+.btn.primary:active{box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 1px 0 #245018;}
+.btn.danger{background:#8b2f2f;border-color:#b04040;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 3px 0 #4a1818;}
+
+.srow{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 2px;font-size:13.5px;color:#d4d4d4;border-bottom:1px solid #2a2a2a;}
+.srow:last-child{border-bottom:none;}
+.sval{color:#7fd45a;font-weight:700;font-family:ui-monospace,monospace;font-size:13px;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;
+  background:transparent;margin:4px 0;}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;
+  background:#3a3a3a;border:1px solid #555;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:3px;background:#c6c6c6;border:2px solid #8a8a8a;margin-top:-8px;
+  box-shadow:0 2px 0 #555;cursor:pointer;}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:#3a3a3a;border:1px solid #555;}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:3px;
+  background:#c6c6c6;border:2px solid #8a8a8a;cursor:pointer;}
+
+.textInput{width:100%;padding:9px 10px;margin:6px 0 10px;background:#0e0e0e;
+  border:2px solid #3a3a3a;border-radius:3px;color:#fff;font-size:14px;
+  font-family:inherit;outline:none;}
+.textInput:focus{border-color:#5aad3c;}
+
+.toggle{display:flex;border:2px solid #555;border-radius:3px;overflow:hidden;cursor:pointer;}
+.toggle .opt{padding:5px 12px;font-size:12.5px;font-weight:700;background:#2e2e2e;color:#888;
+  transition:background .12s,color .12s;min-width:52px;text-align:center;}
+.toggle .opt.on{background:#3c8527;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.5);}
+
+/* ====== 基岩版主菜单 ====== */
+#menu{background:linear-gradient(to bottom,#5b8fbd 0%,#8ab8d8 32%,#c8d8e4 58%,#a8b898 78%,#7a8a60 100%);
+  overflow:hidden;}
+#menu::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 22%,rgba(255,255,255,.55) 0%,transparent 8%),
+    radial-gradient(circle at 42% 14%,rgba(255,255,255,.45) 0%,transparent 6%),
+    radial-gradient(circle at 72% 25%,rgba(255,255,255,.5) 0%,transparent 7%),
+    radial-gradient(circle at 88% 12%,rgba(255,255,255,.4) 0%,transparent 5%);
+  animation:cloudDrift 90s linear infinite;}
+@keyframes cloudDrift{from{transform:translateX(-3%);}to{transform:translateX(3%);}}
+#menu::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to bottom,transparent 65%,rgba(0,0,0,.35) 100%);}
+
+#menuInner{position:relative;z-index:2;width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+#menuLogo{text-align:center;margin-bottom:26px;}
+#menuLogo h1{font-size:clamp(34px,9vw,54px);font-weight:900;letter-spacing:6px;
+  color:#fff;text-shadow:4px 4px 0 #1a3a08,5px 5px 0 rgba(0,0,0,.4);line-height:1;}
+#menuLogo p{font-size:11px;letter-spacing:5px;color:#e8f0d8;margin-top:6px;
+  text-shadow:2px 2px 0 rgba(0,0,0,.5);}
+#menuBtnBox{width:min(320px,86vw);}
+.mbtn{display:block;width:100%;padding:13px;margin-bottom:9px;cursor:pointer;
+  background:linear-gradient(to bottom,#8a8a8a,#6e6e6e);
+  border:2px solid #2a2a2a;border-radius:2px;color:#fff;font-size:15px;font-weight:700;
+  letter-spacing:2px;font-family:inherit;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.28),inset 0 -3px 0 rgba(0,0,0,.28),0 3px 0 rgba(0,0,0,.5);
+  text-shadow:2px 2px 0 rgba(0,0,0,.55);transition:transform .06s,filter .06s;}
+.mbtn:hover{filter:brightness(1.1);}
+.mbtn:active{transform:translateY(3px);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.28),inset 0 -3px 0 rgba(0,0,0,.28),0 0 0 rgba(0,0,0,.5);}
+#menuFooter{position:absolute;bottom:12px;left:0;right:0;text-align:center;
+  font-size:11px;color:rgba(255,255,255,.85);text-shadow:1px 1px 0 rgba(0,0,0,.6);
+  letter-spacing:1.5px;z-index:2;}
+
+/* ====== 存档列表 ====== */
+.worldItem{display:flex;gap:10px;padding:8px;margin-bottom:8px;background:#262626;
+  border:2px solid #3a3a3a;border-radius:3px;cursor:pointer;transition:border-color .1s;}
+.worldItem:hover{border-color:#5aad3c;}
+.worldItem img{width:64px;height:36px;object-fit:cover;border-radius:2px;
+  background:#111;border:1px solid #444;image-rendering:pixelated;}
+.worldItem .info{flex:1;min-width:0;}
+.worldItem .nm{font-size:13.5px;font-weight:700;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.worldItem .meta{font-size:10.5px;color:#888;font-family:ui-monospace,monospace;margin-top:3px;}
+.worldItem .acts{display:flex;gap:4px;margin-top:5px;}
+.tinyBtn{padding:3px 8px;background:#3a3a3a;border:1px solid #555;border-radius:2px;
+  color:#ccc;font-size:10.5px;cursor:pointer;font-family:inherit;}
+.tinyBtn:hover{background:#4a4a4a;color:#fff;}
+.empty{text-align:center;color:#666;padding:24px 0;font-size:13px;}
+
+/* ====== 加载 ====== */
+#loading{background:#0e1218;flex-direction:column;}
+#loading .wrap{text-align:center;animation:zoomIn .5s cubic-bezier(.34,1.4,.64,1);}
+@keyframes zoomIn{from{transform:scale(.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+#loading .logo{font-size:28px;font-weight:900;letter-spacing:5px;color:#7fd45a;
+  text-shadow:3px 3px 0 #24451a;margin-bottom:4px;}
+#loading .sub{font-size:10px;letter-spacing:3px;color:#6a7a8a;margin-bottom:22px;}
+#loadBar{width:min(280px,72vw);height:10px;background:#1e242c;border:2px solid #333;
+  border-radius:2px;overflow:hidden;margin:0 auto;}
+#loadFill{height:100%;width:0%;background:linear-gradient(90deg,#3c8527,#7fd45a);transition:width .15s;}
+#loadTxt{font-size:11px;color:#7a8a9a;margin-top:10px;font-family:ui-monospace,monospace;}
+
+/* ====== HUD ====== */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10;display:none;}
+#cross{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;opacity:.78;}
+#cross::before,#cross::after{content:"";position:absolute;background:#fff;
+  box-shadow:0 0 3px rgba(0,0,0,.95);}
+#cross::before{left:50%;top:0;width:2px;height:100%;margin-left:-1px;}
+#cross::after{top:50%;left:0;height:2px;width:100%;margin-top:-1px;}
+#info{position:absolute;left:8px;top:6px;color:#fff;font-size:10.5px;line-height:1.6;
+  text-shadow:1px 1px 0 rgba(0,0,0,.95),-1px -1px 0 rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.9);
+  white-space:pre;font-family:ui-monospace,Menlo,monospace;}
+.gbtn{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(0,0,0,.35);
+  border:2px solid rgba(255,255,255,.5);color:#fff;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  text-shadow:0 1px 3px rgba(0,0,0,.9);touch-action:none;font-size:15px;
+  transition:transform .06s,background .06s;}
+.gbtn:active{transform:scale(.9);background:rgba(255,255,255,.35);}
+#btnJump{right:84px;bottom:20px;width:58px;height:58px;}
+#btnBreak{right:16px;bottom:20px;width:68px;height:68px;font-size:16px;
+  border-color:rgba(255,150,130,.85);background:rgba(140,40,30,.45);}
+#btnPlace{right:16px;bottom:94px;width:58px;height:58px;
+  border-color:rgba(150,225,150,.85);background:rgba(50,120,55,.45);}
+#btnPause{right:14px;top:12px;width:40px;height:40px;font-size:16px;border-radius:6px;}
+#hotbar{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
+  display:flex;gap:4px;padding:4px 5px;background:rgba(0,0,0,.4);border-radius:4px;}
+.slot{pointer-events:auto;width:38px;height:38px;border:2px solid rgba(255,255,255,.35);
+  border-radius:3px;background:rgba(30,30,30,.7);display:flex;align-items:center;
+  justify-content:center;transition:transform .08s,border-color .08s;overflow:hidden;}
+.slot.sel{border-color:#fff;background:rgba(255,255,255,.25);transform:translateY(-4px);}
+.slot img{width:26px;height:26px;image-rendering:pixelated;}
+#joy{position:absolute;pointer-events:none;width:110px;height:110px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);display:none;}
+#joyKnob{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;
+  border-radius:50%;background:rgba(255,255,255,.32);border:2px solid rgba(255,255,255,.55);}
+#tip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;
+  font-size:13px;text-shadow:0 2px 8px #000;text-align:center;line-height:1.9;pointer-events:none;}
+
+@media (max-width:620px){
+  .slot{width:32px;height:32px;}
+  .slot img{width:22px;height:22px;}
+  #hotbar{bottom:74px;gap:3px;padding:3px 4px;}
+  #btnBreak{width:62px;height:62px;right:12px;bottom:12px;font-size:14px;}
+  #btnPlace{width:52px;height:52px;right:12px;bottom:82px;}
+  #btnJump{width:52px;height:52px;right:80px;bottom:12px;}
+  #info{font-size:9.5px;}
+  .panel{padding:12px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<!-- ========== 主菜单（基岩版风格） ========== -->
+<div id="menu" class="screen on">
+  <div id="menuInner">
+    <div id="menuLogo">
+      <h1>MINICRAFT</h1>
+      <p>BEDROCK EDITION</p>
+    </div>
+    <div id="menuBtnBox">
+      <button class="mbtn" id="btnNewWorld">创 建 新 世 界</button>
+      <button class="mbtn" id="btnLoadWorld">存 档 列 表</button>
+      <button class="mbtn" id="btnSettings">设 置</button>
+    </div>
+  </div>
+  <div id="menuFooter">v1.0 · WebGL · Bedrock Style</div>
+</div>
+
+<!-- ========== 创建世界 ========== -->
+<div id="dlgNew" class="screen">
+  <div class="panel">
+    <div class="title">创建新世界</div>
+    <div class="srow"><span>世界名称</span></div>
+    <input type="text" id="nwName" class="textInput" maxlength="24" placeholder="新的世界">
+    <div class="srow"><span>种子</span><span class="sval" id="nwSeedInfo">随机</span></div>
+    <input type="text" id="nwSeed" class="textInput" placeholder="留空则使用随机种子">
+    <div class="srow"><span>最大内存</span><span class="sval" id="nwRamInfo">2048 MB</span></div>
+    <input type="range" id="nwRam" min="512" max="8192" step="256" value="2048">
+    <div class="srow"><span>渲染距离</span><span class="sval" id="nwDistInfo">6 区块</span></div>
+    <input type="range" id="nwDist" min="2" max="16" step="1" value="6">
+    <div style="height:12px"></div>
+    <button class="btn primary" id="btnDoCreate">创 建 世 界</button>
+    <button class="btn" id="btnCancelNew">取 消</button>
+  </div>
+</div>
+
+<!-- ========== 存档列表 ========== -->
+<div id="dlgList" class="screen">
+  <div class="panel">
+    <div class="title">存档列表</div>
+    <div id="worldListContent"></div>
+    <div style="height:8px"></div>
+    <button class="btn" id="btnImport">导 入 .wmp 文 件</button>
+    <button class="btn primary" id="btnBackList">返 回 主 菜 单</button>
+    <input type="file" id="fileImport" accept=".wmp,.zip" style="display:none">
+  </div>
+</div>
+
+<!-- ========== 设置 ========== -->
+<div id="dlgSettings" class="screen">
+  <div class="panel">
+    <div class="title">设置</div>
+    <div class="srow"><span>树叶透明</span>
+      <div class="toggle" id="tgLeaves"><div class="opt" data-v="0">关</div><div class="opt on" data-v="1">开</div></div>
+    </div>
+    <div class="srow"><span>视角灵敏度</span><span class="sval" id="stSensVal">1.0×</span></div>
+    <input type="range" id="stSens" min="30" max="300" step="10" value="100">
+    <div class="srow"><span>视野 FOV</span><span class="sval" id="stFovVal">70°</span></div>
+    <input type="range" id="stFov" min="50" max="110" step="5" value="70">
+    <div class="srow"><span>性能模式</span>
+      <div class="toggle" id="tgPerf"><div class="opt" data-v="0">画质</div><div class="opt on" data-v="1">平衡</div><div class="opt" data-v="2">性能</div></div>
+    </div>
+    <div style="height:10px"></div>
+    <button class="btn primary" id="btnSettingsOk">完 成</button>
+  </div>
+</div>
+
+<!-- ========== 加载 ========== -->
+<div id="loading" class="screen">
+  <div class="wrap">
+    <div class="logo">MINICRAFT</div>
+    <div class="sub">BUILDING WORLD</div>
+    <div id="loadBar"><div id="loadFill"></div></div>
+    <div id="loadTxt">0%</div>
+  </div>
+</div>
+
+<!-- ========== HUD ========== -->
+<div id="hud">
+  <div id="cross"></div>
+  <div id="info"></div>
+  <div id="joy"><div id="joyKnob"></div></div>
+  <div id="hotbar"></div>
+  <div id="btnJump"  class="gbtn">跳</div>
+  <div id="btnBreak" class="gbtn">挖</div>
+  <div id="btnPlace" class="gbtn">放</div>
+  <div id="btnPause" class="gbtn">☰</div>
+  <div id="tip"></div>
+</div>
+
+<!-- ========== 暂停菜单 ========== -->
+<div id="pause" class="screen">
+  <div class="panel">
+    <div class="title">游戏菜单</div>
+    <button class="btn primary" id="btnResume">返 回 游 戏</button>
+    <button class="btn" id="btnSave">保 存 世 界</button>
+    <button class="btn" id="btnExport">导 出 为 .wmp</button>
+    <button class="btn" id="btnPauseSettings">设 置</button>
+    <button class="btn danger" id="btnQuit">保 存 并 退 出</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =========================================================
+   工具
+   ========================================================= */
+function $(id){ return document.getElementById(id); }
+function setCookie(n,v,d){var e=new Date();e.setTime(e.getTime()+d*864e5);
+  document.cookie=n+'='+encodeURIComponent(v)+';expires='+e.toUTCString()+';path=/';}
+function getCookie(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));
+  return m?decodeURIComponent(m[1]):null;}
+function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+function fmtTime(t){var d=new Date(t);var p=function(n){return n<10?'0'+n:''+n;};
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
+function randSeed(){
+  if (window.crypto && crypto.getRandomValues){
+    var a = new Uint32Array(1); crypto.getRandomValues(a);
+    return a[0] % 2147483647;
+  }
+  return (Math.random()*2147483647)|0;
+}
+
+/* =========================================================
+   CRC32 / Base64 / RLE
+   ========================================================= */
+var CRC_T = null;
+function crcTable(){
+  if (CRC_T) return CRC_T;
+  var t = new Uint32Array(256);
+  for (var n=0;n<256;n++){
+    var c = n;
+    for (var k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1);
+    t[n] = c>>>0;
+  }
+  return CRC_T = t;
+}
+function crc32(buf){
+  var t = crcTable(), c = 0xFFFFFFFF;
+  for (var i=0;i<buf.length;i++) c = t[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function b64enc(bytes){
+  var bin = '', CH = 0x8000;
+  for (var i=0;i<bytes.length;i+=CH){
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CH, bytes.length)));
+  }
+  return btoa(bin);
+}
+function b64dec(s){
+  var bin = atob(s);
+  var a = new Uint8Array(bin.length);
+  for (var i=0;i<bin.length;i++) a[i] = bin.charCodeAt(i);
+  return a;
+}
+function rleEnc(data){
+  var out = new Uint8Array(data.length * 3);
+  var p = 0, i = 0, n = data.length;
+  while (i < n){
+    var v = data[i], c = 1;
+    while (i+c < n && data[i+c] === v && c < 65535) c++;
+    out[p++] = c & 0xFF;
+    out[p++] = (c >> 8) & 0xFF;
+    out[p++] = v;
+    i += c;
+  }
+  return out.subarray(0, p);
+}
+function rleDec(buf, size){
+  var out = new Uint8Array(size);
+  var p = 0, i = 0;
+  while (i < buf.length && p < size){
+    var c = buf[i] | (buf[i+1] << 8);
+    var v = buf[i+2];
+    i += 3;
+    for (var k=0;k<c && p<size;k++) out[p++] = v;
+  }
+  return out;
+}
+
+/* =========================================================
+   ZIP 读写（store 模式，兼容 deflate 读取）
+   ========================================================= */
+function zipCreate(files){
+  var parts = [], central = [], offset = 0;
+  var enc = new TextEncoder();
+  for (var i=0;i<files.length;i++){
+    var f = files[i];
+    var nb = enc.encode(f.name);
+    var crc = crc32(f.data);
+    var sz = f.data.length;
+
+    var local = new Uint8Array(30 + nb.length);
+    var dv = new DataView(local.buffer);
+    dv.setUint32(0, 0x04034b50, true);
+    dv.setUint16(4, 20, true);
+    dv.setUint16(6, 0, true);
+    dv.setUint16(8, 0, true);
+    dv.setUint16(10, 0, true);
+    dv.setUint16(12, 0x2100, true);
+    dv.setUint32(14, crc, true);
+    dv.setUint32(18, sz, true);
+    dv.setUint32(22, sz, true);
+    dv.setUint16(26, nb.length, true);
+    dv.setUint16(28, 0, true);
+    local.set(nb, 30);
+    parts.push(local, f.data);
+
+    var cent = new Uint8Array(46 + nb.length);
+    var dc = new DataView(cent.buffer);
+    dc.setUint32(0, 0x02014b50, true);
+    dc.setUint16(4, 20, true);
+    dc.setUint16(6, 20, true);
+    dc.setUint16(8, 0, true);
+    dc.setUint16(10, 0, true);
+    dc.setUint16(12, 0, true);
+    dc.setUint16(14, 0x2100, true);
+    dc.setUint32(16, crc, true);
+    dc.setUint32(20, sz, true);
+    dc.setUint32(24, sz, true);
+    dc.setUint16(28, nb.length, true);
+    dc.setUint16(30, 0, true);
+    dc.setUint16(32, 0, true);
+    dc.setUint16(34, 0, true);
+    dc.setUint16(36, 0, true);
+    dc.setUint32(38, 0, true);
+    dc.setUint32(42, offset, true);
+    cent.set(nb, 46);
+    central.push(cent);
+
+    offset += local.length + sz;
+  }
+  var cs = 0;
+  for (var j=0;j<central.length;j++) cs += central[j].length;
+
+  var eocd = new Uint8Array(22);
+  var de = new DataView(eocd.buffer);
+  de.setUint32(0, 0x06054b50, true);
+  de.setUint16(4, 0, true);
+  de.setUint16(6, 0, true);
+  de.setUint16(8, files.length, true);
+  de.setUint16(10, files.length, true);
+  de.setUint32(12, cs, true);
+  de.setUint32(16, offset, true);
+  de.setUint16(20, 0, true);
+
+  var total = offset + cs + 22;
+  var out = new Uint8Array(total);
+  var pos = 0;
+  for (var k=0;k<parts.length;k++){ out.set(parts[k], pos); pos += parts[k].length; }
+  for (var m=0;m<central.length;m++){ out.set(central[m], pos); pos += central[m].length; }
+  out.set(eocd, pos);
+  return out;
+}
+
+function zipRead(bytes){
+  var dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  var eocd = -1;
+  for (var i=bytes.length-22;i>=0;i--){
+    if (dv.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('不是有效的 ZIP 文件');
+  var count = dv.getUint16(eocd+10, true);
+  var cdOff = dv.getUint32(eocd+16, true);
+  var dec = new TextDecoder();
+  var out = [], pos = cdOff;
+  for (var n=0;n<count;n++){
+    if (dv.getUint32(pos, true) !== 0x02014b50) break;
+    var method = dv.getUint16(pos+10, true);
+    var compSz = dv.getUint32(pos+20, true);
+    var nl = dv.getUint16(pos+28, true);
+    var el = dv.getUint16(pos+30, true);
+    var cl = dv.getUint16(pos+32, true);
+    var lo = dv.getUint32(pos+42, true);
+    var name = dec.decode(bytes.subarray(pos+46, pos+46+nl));
+    var lnl = dv.getUint16(lo+26, true);
+    var lel = dv.getUint16(lo+28, true);
+    var ds = lo + 30 + lnl + lel;
+    var data = bytes.subarray(ds, ds + compSz);
+    out.push({name:name, method:method, data:data});
+    pos += 46 + nl + el + cl;
+  }
+  return out;
+}
+
+async function inflateRaw(data){
+  if (typeof DecompressionStream === 'undefined') throw new Error('浏览器不支持解压');
+  var ds = new DecompressionStream('deflate-raw');
+  var blob = new Blob([data]);
+  var stream = blob.stream().pipeThrough(ds);
+  var ab = await new Response(stream).arrayBuffer();
+  return new Uint8Array(ab);
+}
+
+/* =========================================================
+   方块注册表
+   ========================================================= */
+var AIR=0, STONE=1, GRASS=2, DIRT=3, COBBLE=4, PLANKS=5, LOG=6,
+    LEAVES=7, SAND=8, WATER=9, BEDROCK=10, GLASS=11, BRICK=12, SNOW=13;
+
+var B = [];
+function def(id, name, tt, ts, tb, o){
+  o = o || {};
+  B[id] = {id:id, name:name, tTop:tt, tSide:ts, tBot:tb,
+    opaque: o.opaque !== undefined ? o.opaque : true,
+    solid:  o.solid  !== undefined ? o.solid  : true,
+    gravity: o.gravity ? true : false};
+}
+def(AIR,'air',null,null,null,{opaque:false,solid:false});
+def(STONE,'stone','stone','stone','stone');
+def(GRASS,'grass_block','grass_top','grass_side','dirt');
+def(DIRT,'dirt','dirt','dirt','dirt');
+def(COBBLE,'cobblestone','cobble','cobble','cobble');
+def(PLANKS,'oak_planks','planks','planks','planks');
+def(LOG,'oak_log','log_top','log_side','log_top');
+def(LEAVES,'oak_leaves','leaves','leaves','leaves',{opaque:false,solid:true});
+def(SAND,'sand','sand','sand','sand',{gravity:true});
+def(WATER,'water','water','water','water',{opaque:false,solid:false});
+def(BEDROCK,'bedrock','bedrock','bedrock','bedrock');
+def(GLASS,'glass','glass','glass','glass',{opaque:false,solid:true});
+def(BRICK,'bricks','brick','brick','brick');
+def(SNOW,'snow_block','snow','snow','snow');
+
+/* =========================================================
+   SVG 纹理
+   ========================================================= */
+function svg(inner){
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" '+
+    'viewBox="0 0 16 16" shape-rendering="crispEdges">'+inner+'</svg>');
+}
+var TEX = {};
+TEX.stone = svg('<rect width="16" height="16" fill="#7c7c7c"/>'+
+  '<rect x="1" y="1" width="3" height="2" fill="#6a6a6a"/><rect x="6" y="0" width="4" height="2" fill="#8e8e8e"/>'+
+  '<rect x="11" y="1" width="4" height="3" fill="#6a6a6a"/><rect x="0" y="5" width="2" height="3" fill="#8e8e8e"/>'+
+  '<rect x="4" y="4" width="3" height="2" fill="#6a6a6a"/><rect x="9" y="5" width="3" height="3" fill="#8e8e8e"/>'+
+  '<rect x="13" y="6" width="3" height="2" fill="#6a6a6a"/><rect x="2" y="9" width="3" height="3" fill="#6a6a6a"/>'+
+  '<rect x="7" y="9" width="4" height="2" fill="#8e8e8e"/><rect x="12" y="10" width="3" height="3" fill="#6a6a6a"/>'+
+  '<rect x="0" y="12" width="4" height="3" fill="#8e8e8e"/><rect x="5" y="13" width="4" height="2" fill="#6a6a6a"/>'+
+  '<rect x="10" y="13" width="3" height="3" fill="#8e8e8e"/>');
+TEX.dirt = svg('<rect width="16" height="16" fill="#8b6239"/>'+
+  '<rect x="2" y="1" width="3" height="2" fill="#6e4c2c"/><rect x="8" y="2" width="2" height="3" fill="#9c7248"/>'+
+  '<rect x="12" y="0" width="3" height="2" fill="#6e4c2c"/><rect x="0" y="5" width="4" height="2" fill="#9c7248"/>'+
+  '<rect x="5" y="6" width="3" height="2" fill="#6e4c2c"/><rect x="10" y="5" width="3" height="3" fill="#9c7248"/>'+
+  '<rect x="14" y="7" width="2" height="2" fill="#6e4c2c"/><rect x="1" y="9" width="3" height="3" fill="#6e4c2c"/>'+
+  '<rect x="6" y="10" width="4" height="2" fill="#9c7248"/><rect x="11" y="9" width="3" height="3" fill="#6e4c2c"/>'+
+  '<rect x="0" y="13" width="5" height="2" fill="#9c7248"/><rect x="7" y="13" width="3" height="3" fill="#6e4c2c"/>'+
+  '<rect x="12" y="13" width="4" height="2" fill="#9c7248"/>');
+TEX.grass_top = svg('<rect width="16" height="16" fill="#5a9c3a"/>'+
+  '<rect x="1" y="1" width="3" height="3" fill="#47802c"/><rect x="6" y="2" width="2" height="2" fill="#6cb44a"/>'+
+  '<rect x="10" y="0" width="4" height="3" fill="#47802c"/><rect x="0" y="6" width="2" height="3" fill="#6cb44a"/>'+
+  '<rect x="4" y="5" width="3" height="3" fill="#47802c"/><rect x="9" y="6" width="3" height="2" fill="#6cb44a"/>'+
+  '<rect x="13" y="5" width="3" height="3" fill="#47802c"/><rect x="2" y="10" width="3" height="3" fill="#6cb44a"/>'+
+  '<rect x="7" y="10" width="4" height="2" fill="#47802c"/><rect x="12" y="11" width="3" height="3" fill="#6cb44a"/>'+
+  '<rect x="0" y="13" width="4" height="3" fill="#47802c"/><rect x="6" y="14" width="3" height="2" fill="#6cb44a"/>'+
+  '<rect x="10" y="13" width="4" height="3" fill="#47802c"/>');
+TEX.grass_side = svg('<rect width="16" height="16" fill="#8b6239"/>'+
+  '<rect x="2" y="6" width="3" height="2" fill="#6e4c2c"/><rect x="9" y="7" width="3" height="3" fill="#9c7248"/>'+
+  '<rect x="13" y="6" width="2" height="2" fill="#6e4c2c"/><rect x="0" y="10" width="3" height="2" fill="#9c7248"/>'+
+  '<rect x="5" y="11" width="4" height="2" fill="#6e4c2c"/><rect x="11" y="10" width="3" height="3" fill="#9c7248"/>'+
+  '<rect x="2" y="14" width="4" height="2" fill="#6e4c2c"/><rect x="8" y="13" width="3" height="3" fill="#9c7248"/>'+
+  '<rect x="13" y="14" width="3" height="2" fill="#6e4c2c"/><rect x="0" y="0" width="16" height="4" fill="#5a9c3a"/>'+
+  '<rect x="0" y="4" width="2" height="1" fill="#5a9c3a"/><rect x="3" y="4" width="3" height="1" fill="#5a9c3a"/>'+
+  '<rect x="8" y="4" width="2" height="1" fill="#5a9c3a"/><rect x="12" y="4" width="3" height="1" fill="#5a9c3a"/>'+
+  '<rect x="1" y="0" width="3" height="2" fill="#47802c"/><rect x="7" y="1" width="2" height="2" fill="#6cb44a"/>'+
+  '<rect x="11" y="0" width="3" height="2" fill="#47802c"/><rect x="5" y="2" width="2" height="2" fill="#6cb44a"/>'+
+  '<rect x="14" y="2" width="2" height="2" fill="#47802c"/>');
+TEX.cobble = svg('<rect width="16" height="16" fill="#6e6e6e"/>'+
+  '<rect x="0" y="0" width="7" height="5" fill="#7c7c7c"/><rect x="8" y="0" width="8" height="5" fill="#888"/>'+
+  '<rect x="0" y="6" width="4" height="5" fill="#888"/><rect x="5" y="6" width="6" height="5" fill="#7c7c7c"/>'+
+  '<rect x="12" y="6" width="4" height="5" fill="#888"/><rect x="0" y="12" width="6" height="4" fill="#7c7c7c"/>'+
+  '<rect x="7" y="12" width="5" height="4" fill="#888"/><rect x="13" y="12" width="3" height="4" fill="#7c7c7c"/>'+
+  '<rect x="0" y="5" width="16" height="1" fill="#4a4a4a"/><rect x="0" y="11" width="16" height="1" fill="#4a4a4a"/>'+
+  '<rect x="7" y="0" width="1" height="5" fill="#4a4a4a"/><rect x="4" y="6" width="1" height="5" fill="#4a4a4a"/>'+
+  '<rect x="11" y="6" width="1" height="5" fill="#4a4a4a"/><rect x="6" y="12" width="1" height="4" fill="#4a4a4a"/>'+
+  '<rect x="12" y="12" width="1" height="4" fill="#4a4a4a"/>');
+TEX.planks = svg('<rect width="16" height="16" fill="#b08850"/>'+
+  '<rect x="0" y="0" width="16" height="4" fill="#b8905a"/><rect x="0" y="4" width="16" height="4" fill="#a87e48"/>'+
+  '<rect x="0" y="8" width="16" height="4" fill="#b8905a"/><rect x="0" y="12" width="16" height="4" fill="#a87e48"/>'+
+  '<rect x="0" y="4" width="16" height="1" fill="#7a5a30"/><rect x="0" y="8" width="16" height="1" fill="#7a5a30"/>'+
+  '<rect x="0" y="12" width="16" height="1" fill="#7a5a30"/><rect x="3" y="0" width="1" height="4" fill="#a07840"/>'+
+  '<rect x="11" y="0" width="1" height="4" fill="#a07840"/><rect x="6" y="4" width="1" height="4" fill="#987038"/>'+
+  '<rect x="13" y="4" width="1" height="4" fill="#987038"/><rect x="2" y="8" width="1" height="4" fill="#a07840"/>'+
+  '<rect x="9" y="8" width="1" height="4" fill="#a07840"/><rect x="5" y="12" width="1" height="4" fill="#987038"/>'+
+  '<rect x="14" y="12" width="1" height="4" fill="#987038"/>');
+TEX.log_side = svg('<rect width="16" height="16" fill="#6b4f2a"/>'+
+  '<rect x="1" y="0" width="2" height="16" fill="#5a3f1e"/><rect x="4" y="0" width="1" height="16" fill="#7d5f36"/>'+
+  '<rect x="6" y="0" width="2" height="16" fill="#5a3f1e"/><rect x="9" y="0" width="1" height="16" fill="#7d5f36"/>'+
+  '<rect x="11" y="0" width="2" height="16" fill="#5a3f1e"/><rect x="14" y="0" width="1" height="16" fill="#7d5f36"/>'+
+  '<rect x="0" y="3" width="16" height="1" fill="#4a3218"/><rect x="0" y="10" width="16" height="1" fill="#4a3218"/>');
+TEX.log_top = svg('<rect width="16" height="16" fill="#b08850"/>'+
+  '<rect x="1" y="1" width="14" height="14" fill="#a07840"/><rect x="3" y="3" width="10" height="10" fill="#b08850"/>'+
+  '<rect x="5" y="5" width="6" height="6" fill="#a07840"/><rect x="6" y="6" width="4" height="4" fill="#8a6530"/>'+
+  '<rect x="0" y="0" width="16" height="1" fill="#7a5a30"/><rect x="0" y="15" width="16" height="1" fill="#7a5a30"/>'+
+  '<rect x="0" y="0" width="1" height="16" fill="#7a5a30"/><rect x="15" y="0" width="1" height="16" fill="#7a5a30"/>');
+TEX.leaves = svg('<rect x="1" y="0" width="4" height="3" fill="#3d8a2a"/>'+
+  '<rect x="7" y="1" width="3" height="3" fill="#2d6a1e"/><rect x="11" y="0" width="4" height="3" fill="#3d8a2a"/>'+
+  '<rect x="0" y="4" width="3" height="3" fill="#4fa838"/><rect x="5" y="4" width="4" height="3" fill="#3d8a2a"/>'+
+  '<rect x="10" y="4" width="3" height="3" fill="#2d6a1e"/><rect x="14" y="4" width="2" height="3" fill="#4fa838"/>'+
+  '<rect x="2" y="8" width="3" height="3" fill="#2d6a1e"/><rect x="6" y="8" width="4" height="3" fill="#4fa838"/>'+
+  '<rect x="11" y="8" width="4" height="3" fill="#3d8a2a"/><rect x="0" y="12" width="3" height="3" fill="#3d8a2a"/>'+
+  '<rect x="4" y="12" width="3" height="3" fill="#2d6a1e"/><rect x="8" y="12" width="4" height="3" fill="#4fa838"/>'+
+  '<rect x="13" y="12" width="3" height="3" fill="#3d8a2a"/><rect x="3" y="1" width="2" height="2" fill="#1f5a14"/>'+
+  '<rect x="8" y="5" width="2" height="2" fill="#1f5a14"/><rect x="13" y="9" width="2" height="2" fill="#1f5a14"/>'+
+  '<rect x="5" y="13" width="2" height="2" fill="#1f5a14"/>');
+TEX.leaves_solid = svg('<rect width="16" height="16" fill="#3d8a2a"/>'+
+  '<rect x="1" y="1" width="3" height="3" fill="#2d6a1e"/><rect x="6" y="0" width="3" height="2" fill="#4fa838"/>'+
+  '<rect x="11" y="1" width="4" height="3" fill="#2d6a1e"/><rect x="0" y="6" width="3" height="3" fill="#4fa838"/>'+
+  '<rect x="5" y="5" width="3" height="3" fill="#2d6a1e"/><rect x="10" y="6" width="4" height="3" fill="#4fa838"/>'+
+  '<rect x="14" y="5" width="2" height="3" fill="#2d6a1e"/><rect x="2" y="10" width="3" height="3" fill="#2d6a1e"/>'+
+  '<rect x="7" y="11" width="3" height="2" fill="#4fa838"/><rect x="11" y="10" width="3" height="3" fill="#2d6a1e"/>'+
+  '<rect x="0" y="14" width="4" height="2" fill="#4fa838"/><rect x="6" y="14" width="3" height="2" fill="#2d6a1e"/>'+
+  '<rect x="12" y="14" width="4" height="2" fill="#4fa838"/>');
+TEX.sand = svg('<rect width="16" height="16" fill="#e0d5a8"/>'+
+  '<rect x="2" y="1" width="2" height="2" fill="#cfc296"/><rect x="7" y="2" width="2" height="1" fill="#efe4bc"/>'+
+  '<rect x="12" y="0" width="2" height="2" fill="#cfc296"/><rect x="0" y="5" width="2" height="2" fill="#efe4bc"/>'+
+  '<rect x="5" y="5" width="2" height="2" fill="#cfc296"/><rect x="10" y="6" width="2" height="2" fill="#efe4bc"/>'+
+  '<rect x="14" y="5" width="2" height="2" fill="#cfc296"/><rect x="3" y="9" width="2" height="2" fill="#cfc296"/>'+
+  '<rect x="8" y="10" width="2" height="2" fill="#efe4bc"/><rect x="12" y="9" width="2" height="2" fill="#cfc296"/>'+
+  '<rect x="1" y="13" width="2" height="2" fill="#efe4bc"/><rect x="6" y="13" width="2" height="2" fill="#cfc296"/>'+
+  '<rect x="11" y="14" width="2" height="2" fill="#efe4bc"/>');
+TEX.water = svg('<rect width="16" height="16" fill="#3a6fc4"/>'+
+  '<rect x="0" y="2" width="6" height="1" fill="#4a80d4"/><rect x="8" y="3" width="6" height="1" fill="#4a80d4"/>'+
+  '<rect x="0" y="7" width="4" height="1" fill="#4a80d4"/><rect x="6" y="8" width="7" height="1" fill="#4a80d4"/>'+
+  '<rect x="2" y="12" width="5" height="1" fill="#4a80d4"/><rect x="10" y="13" width="5" height="1" fill="#4a80d4"/>'+
+  '<rect x="0" y="4" width="4" height="1" fill="#2d5ba8"/><rect x="7" y="5" width="5" height="1" fill="#2d5ba8"/>'+
+  '<rect x="12" y="9" width="4" height="1" fill="#2d5ba8"/><rect x="0" y="11" width="3" height="1" fill="#2d5ba8"/>'+
+  '<rect x="8" y="14" width="5" height="1" fill="#2d5ba8"/>');
+TEX.bedrock = svg('<rect width="16" height="16" fill="#4a4a4a"/>'+
+  '<rect x="1" y="1" width="4" height="3" fill="#333"/><rect x="8" y="0" width="3" height="4" fill="#5c5c5c"/>'+
+  '<rect x="12" y="2" width="4" height="3" fill="#333"/><rect x="0" y="6" width="3" height="4" fill="#5c5c5c"/>'+
+  '<rect x="5" y="5" width="4" height="3" fill="#333"/><rect x="10" y="7" width="4" height="3" fill="#5c5c5c"/>'+
+  '<rect x="2" y="11" width="4" height="3" fill="#333"/><rect x="8" y="11" width="4" height="3" fill="#5c5c5c"/>'+
+  '<rect x="13" y="12" width="3" height="3" fill="#333"/>');
+TEX.glass = svg('<rect x="0" y="0" width="16" height="1" fill="#cfe8f2"/>'+
+  '<rect x="0" y="15" width="16" height="1" fill="#cfe8f2"/><rect x="0" y="0" width="1" height="16" fill="#cfe8f2"/>'+
+  '<rect x="15" y="0" width="1" height="16" fill="#cfe8f2"/><rect x="0" y="0" width="2" height="2" fill="#eaf6fb"/>'+
+  '<rect x="14" y="0" width="2" height="2" fill="#eaf6fb"/><rect x="0" y="14" width="2" height="2" fill="#eaf6fb"/>'+
+  '<rect x="14" y="14" width="2" height="2" fill="#eaf6fb"/><rect x="3" y="3" width="3" height="1" fill="#ffffff"/>'+
+  '<rect x="3" y="4" width="1" height="2" fill="#ffffff"/><rect x="10" y="11" width="3" height="1" fill="#ffffff"/>'+
+  '<rect x="7" y="3" width="1" height="3" fill="#dbeef6"/><rect x="3" y="7" width="3" height="1" fill="#dbeef6"/>');
+TEX.brick = svg('<rect width="16" height="16" fill="#a04a3a"/>'+
+  '<rect x="0" y="3" width="16" height="1" fill="#d8d0c0"/><rect x="0" y="7" width="16" height="1" fill="#d8d0c0"/>'+
+  '<rect x="0" y="11" width="16" height="1" fill="#d8d0c0"/><rect x="0" y="15" width="16" height="1" fill="#d8d0c0"/>'+
+  '<rect x="7" y="0" width="1" height="3" fill="#d8d0c0"/><rect x="3" y="4" width="1" height="3" fill="#d8d0c0"/>'+
+  '<rect x="11" y="4" width="1" height="3" fill="#d8d0c0"/><rect x="7" y="8" width="1" height="3" fill="#d8d0c0"/>'+
+  '<rect x="3" y="12" width="1" height="3" fill="#d8d0c0"/><rect x="11" y="12" width="1" height="3" fill="#d8d0c0"/>');
+TEX.snow = svg('<rect width="16" height="16" fill="#f0f4f8"/>'+
+  '<rect x="2" y="2" width="3" height="2" fill="#e0e8f0"/><rect x="9" y="1" width="2" height="3" fill="#ffffff"/>'+
+  '<rect x="13" y="3" width="3" height="2" fill="#e0e8f0"/><rect x="0" y="6" width="3" height="3" fill="#ffffff"/>'+
+  '<rect x="5" y="7" width="3" height="2" fill="#e0e8f0"/><rect x="10" y="6" width="3" height="3" fill="#ffffff"/>'+
+  '<rect x="3" y="11" width="3" height="3" fill="#e0e8f0"/><rect x="8" y="12" width="3" height="2" fill="#ffffff"/>'+
+  '<rect x="13" y="11" width="3" height="3" fill="#e0e8f0"/>');
+
+/* =========================================================
+   纹理图集
+   ========================================================= */
+var TEX_NAMES = ['stone','dirt','grass_top','grass_side','cobble','planks',
+  'log_side','log_top','leaves','leaves_solid','sand','water',
+  'bedrock','glass','brick','snow'];
+var TEX_IDX = {};
+for (var _i=0;_i<TEX_NAMES.length;_i++) TEX_IDX[TEX_NAMES[_i]] = _i;
+var ATLAS_COLS = 4, TILE = 16, ATLAS_PX = ATLAS_COLS*TILE;
+var TEX_UV = [];
+for (var _n=0;_n<TEX_NAMES.length;_n++){
+  var _c = _n % ATLAS_COLS, _r = (_n/ATLAS_COLS)|0;
+  var e = 0.0005;
+  TEX_UV[_n] = {
+    u0: _c/ATLAS_COLS+e, u1: (_c+1)/ATLAS_COLS-e,
+    v0: 1-(_r+1)/ATLAS_COLS+e, v1: 1-_r/ATLAS_COLS-e
+  };
+}
+var atlasTex = null;
+function buildAtlas(cb){
+  var cv = document.createElement('canvas');
+  cv.width = ATLAS_PX; cv.height = ATLAS_PX;
+  var ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0,0,ATLAS_PX,ATLAS_PX);
+  var done = 0, total = TEX_NAMES.length;
+  TEX_NAMES.forEach(function(name, i){
+    var img = new Image();
+    img.onload = function(){
+      var col = i%ATLAS_COLS, row = (i/ATLAS_COLS)|0;
+      ctx.drawImage(img, col*TILE, row*TILE, TILE, TILE);
+      if (++done === total) cb(cv);
+    };
+    img.onerror = function(){
+      var col = i%ATLAS_COLS, row = (i/ATLAS_COLS)|0;
+      ctx.fillStyle = '#ff00ff';
+      ctx.fillRect(col*TILE, row*TILE, TILE, TILE);
+      if (++done === total) cb(cv);
+    };
+    img.src = TEX[name];
+  });
+}
+
+/* =========================================================
+   噪声
+   ========================================================= */
+function hash2i(x,y){
+  var n = Math.imul(x|0, 374761393) + Math.imul(y|0, 668265263);
+  n = Math.imul(n ^ (n>>>13), 1274126177);
+  return ((n ^ (n>>>16)) >>> 0) / 4294967295;
+}
+function vnoise(x,y){
+  var xi = Math.floor(x), yi = Math.floor(y);
+  var xf = x-xi, yf = y-yi;
+  var u = xf*xf*(3-2*xf), v = yf*yf*(3-2*yf);
+  var a = hash2i(xi,yi),   b = hash2i(xi+1,yi);
+  var c = hash2i(xi,yi+1), d = hash2i(xi+1,yi+1);
+  var ab = a+(b-a)*u, cd = c+(d-c)*u;
+  return ab+(cd-ab)*v;
+}
+function fbm(x,y,oct){
+  var v=0, amp=0.5, f=1, mx=0;
+  for (var i=0;i<oct;i++){ v += vnoise(x*f,y*f)*amp; mx += amp; amp*=0.5; f*=2.03; }
+  return v/mx;
+}
+
+var SEED = 20260930;
+
+function terrainHeight(wx,wz){
+  var cont = fbm((wx + SEED)*0.0045, (wz - SEED)*0.0045, 4);
+  var det  = fbm(wx*0.042 + 777, wz*0.042 - 333, 2);
+  return (16 + cont*42 + (det-0.5)*6) | 0;
+}
+
+/* =========================================================
+   区块系统
+   ========================================================= */
+var CS = 16, WH = 80, SEA = 32;
+var CS3 = CS*CS*WH;
+
+var chunks = new Map();
+var renderDist = 6;
+
+function ckey(cx,cz){ return cx+','+cz; }
+function getChunk(cx,cz){
+  var k = ckey(cx,cz);
+  var c = chunks.get(k);
+  if (!c){
+    c = {cx:cx, cz:cz, data:null, vboO:null, cntO:0, vboT:null, cntT:0,
+         dirty:true, modified:false};
+    chunks.set(k,c);
+  }
+  return c;
+}
+
+function genChunk(c){
+  var d = c.data = new Uint8Array(CS3);
+  var bx = c.cx*CS, bz = c.cz*CS;
+  var heights = new Int16Array(CS*CS);
+  var lx, lz, y;
+
+  for (lz=0;lz<CS;lz++){
+    var lz4 = lz<<4;
+    for (lx=0;lx<CS;lx++){
+      var wx = bx+lx, wz = bz+lz;
+      var h = terrainHeight(wx,wz);
+      if (h<2) h=2;
+      if (h>WH-14) h=WH-14;
+      heights[lz4|lx] = h;
+      var uw = h <= SEA;
+      for (y=0;y<=h;y++){
+        var id;
+        if (y===0)       id = BEDROCK;
+        else if (y===h)  id = uw ? SAND : GRASS;
+        else if (y>h-4)  id = uw ? SAND : DIRT;
+        else             id = STONE;
+        d[(y<<8)|lz4|lx] = id;
+      }
+      for (y=h+1;y<=SEA;y++) d[(y<<8)|lz4|lx] = WATER;
+    }
+  }
+  for (lz=3;lz<CS-3;lz++){
+    var lz4b = lz<<4;
+    for (lx=3;lx<CS-3;lx++){
+      var wxT = bx+lx, wzT = bz+lz;
+      if (hash2i(wxT*91+13, wzT*57+29) > 0.986){
+        var th = heights[lz4b|lx];
+        if (th > SEA+2) plantTree(d, lx, th+1, lz, wxT, wzT);
+      }
+    }
+  }
+}
+
+function plantTree(d, lx, ly, lz, wx, wz){
+  var h = 4 + ((hash2i(wx*17+3, wz*31+7)*3)|0);
+  var i, y;
+  for (i=0;i<h;i++){
+    y = ly+i;
+    if (y<WH) d[(y<<8)|(lz<<4)|lx] = LOG;
+  }
+  var topY = ly+h-1;
+  for (var dy=-2;dy<=1;dy++){
+    var yy = topY+dy;
+    if (yy<0||yy>=WH) continue;
+    var r = (dy<=-1)?2:1;
+    for (var dx=-r;dx<=r;dx++){
+      for (var dz=-r;dz<=r;dz++){
+        if (dx===0&&dz===0&&dy<1) continue;
+        if (Math.abs(dx)===r && Math.abs(dz)===r && dy>=0) continue;
+        var nx = lx+dx, nz = lz+dz;
+        if (nx<0||nx>=CS||nz<0||nz>=CS) continue;
+        var p = (yy<<8)|(nz<<4)|nx;
+        if (d[p]===AIR) d[p]=LEAVES;
+      }
+    }
+  }
+  y = topY+1;
+  if (y<WH){
+    var q = (y<<8)|(lz<<4)|lx;
+    if (d[q]===AIR) d[q]=LEAVES;
+  }
+}
+
+function getBlock(wx,wy,wz){
+  if (wy<0||wy>=WH) return AIR;
+  var cx = wx>>4, cz = wz>>4;
+  var c = chunks.get(ckey(cx,cz));
+  if (!c||!c.data) return AIR;
+  return c.data[(wy<<8)|((wz&15)<<4)|(wx&15)];
+}
+function isOpaque(wx,wy,wz){
+  var id = getBlock(wx,wy,wz);
+  return B[id] ? B[id].opaque : false;
+}
+
+/* =========================================================
+   WebGL
+   ========================================================= */
+var canvas = $('c');
+var gl = canvas.getContext('webgl', {antialias:false, alpha:false, depth:true,
+                                     powerPreference:'high-performance'})
+      || canvas.getContext('experimental-webgl', {antialias:false, alpha:false});
+if (!gl){ alert('当前浏览器不支持 WebGL'); return; }
+
+var VS = [
+'attribute vec3 aPos;',
+'attribute vec2 aUV;',
+'attribute float aBright;',
+'uniform mat4 uProj;',
+'uniform mat4 uView;',
+'varying vec2 vUV;',
+'varying float vBright;',
+'varying float vDist;',
+'void main(){',
+'  vUV = aUV; vBright = aBright;',
+'  vec4 vp = uView * vec4(aPos, 1.0);',
+'  vDist = -vp.z;',
+'  gl_Position = uProj * vp;',
+'}'].join('\n');
+
+var FS = [
+'precision mediump float;',
+'uniform sampler2D uTex;',
+'uniform vec3 uFog;',
+'uniform float uFogNear;',
+'uniform float uFogFar;',
+'varying vec2 vUV;',
+'varying float vBright;',
+'varying float vDist;',
+'void main(){',
+'  vec4 c = texture2D(uTex, vUV);',
+'  if (c.a < 0.5) discard;',
+'  vec3 rgb = c.rgb * vBright;',
+'  float f = clamp((vDist - uFogNear) / (uFogFar - uFogNear), 0.0, 1.0);',
+'  f = f * f * (3.0 - 2.0 * f);',
+'  gl_FragColor = vec4(mix(rgb, uFog, f), 1.0);',
+'}'].join('\n');
+
+function sh(t,src){
+  var s = gl.createShader(t);
+  gl.shaderSource(s,src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+var prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+
+var aPos    = gl.getAttribLocation(prog,'aPos');
+var aUV     = gl.getAttribLocation(prog,'aUV');
+var aBright = gl.getAttribLocation(prog,'aBright');
+var uProj   = gl.getUniformLocation(prog,'uProj');
+var uView   = gl.getUniformLocation(prog,'uView');
+var uTex    = gl.getUniformLocation(prog,'uTex');
+var uFog    = gl.getUniformLocation(prog,'uFog');
+var uFogNear= gl.getUniformLocation(prog,'uFogNear');
+var uFogFar = gl.getUniformLocation(prog,'uFogFar');
+
+/* =========================================================
+   矩阵 / 视锥
+   ========================================================= */
+var mProj = new Float32Array(16);
+var mView = new Float32Array(16);
+var frust = new Float32Array(24);
+
+function perspective(out, fovy, aspect, near, far){
+  var f = 1/Math.tan(fovy/2), nf = 1/(near-far);
+  out[0]=f/aspect; out[1]=0; out[2]=0; out[3]=0;
+  out[4]=0; out[5]=f; out[6]=0; out[7]=0;
+  out[8]=0; out[9]=0; out[10]=(far+near)*nf; out[11]=-1;
+  out[12]=0; out[13]=0; out[14]=2*far*near*nf; out[15]=0;
+}
+function extractFrustum(){
+  var m = new Float32Array(16);
+  for (var c=0;c<4;c++) for (var r=0;r<4;r++){
+    var s = 0;
+    for (var k=0;k<4;k++) s += mProj[k*4+r] * mView[c*4+k];
+    m[c*4+r] = s;
+  }
+  var P = frust;
+  P[0]=m[3]+m[0];  P[1]=m[7]+m[4];  P[2]=m[11]+m[8];  P[3]=m[15]+m[12];
+  P[4]=m[3]-m[0];  P[5]=m[7]-m[4];  P[6]=m[11]-m[8];  P[7]=m[15]-m[12];
+  P[8]=m[3]+m[1];  P[9]=m[7]+m[5];  P[10]=m[11]+m[9]; P[11]=m[15]+m[13];
+  P[12]=m[3]-m[1]; P[13]=m[7]-m[5]; P[14]=m[11]-m[9]; P[15]=m[15]-m[13];
+  P[16]=m[3]+m[2]; P[17]=m[7]+m[6]; P[18]=m[11]+m[10];P[19]=m[15]+m[14];
+  P[20]=m[3]-m[2]; P[21]=m[7]-m[6]; P[22]=m[11]-m[10];P[23]=m[15]-m[14];
+  for (var i=0;i<6;i++){
+    var o = i*4;
+    var l = Math.sqrt(P[o]*P[o]+P[o+1]*P[o+1]+P[o+2]*P[o+2]);
+    if (l>1e-6){ P[o]/=l; P[o+1]/=l; P[o+2]/=l; P[o+3]/=l; }
+  }
+}
+function boxVisible(x0,y0,z0,x1,y1,z1){
+  for (var i=0;i<6;i++){
+    var o = i*4;
+    var a=frust[o],b=frust[o+1],c=frust[o+2],d=frust[o+3];
+    var px = a>0?x1:x0, py = b>0?y1:y0, pz = c>0?z1:z0;
+    if (a*px+b*py+c*pz+d < 0) return false;
+  }
+  return true;
+}
+
+/* =========================================================
+   网格构建
+   ========================================================= */
+var FACES = [
+  {n:[ 1,0,0], shade:0.62, uD:[0,0,-1], vD:[0,1,0],
+   c:[[1,0,1],[1,0,0],[1,1,0],[1,1,1]]},
+  {n:[-1,0,0], shade:0.62, uD:[0,0, 1], vD:[0,1,0],
+   c:[[0,0,0],[0,0,1],[0,1,1],[0,1,0]]},
+  {n:[ 0,1,0], shade:1.00, uD:[1,0, 0], vD:[0,0,1],
+   c:[[0,1,0],[0,1,1],[1,1,1],[1,1,0]]},
+  {n:[ 0,-1,0], shade:0.48, uD:[1,0, 0], vD:[0,0,1],
+   c:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]]},
+  {n:[ 0,0,1], shade:0.80, uD:[1,0, 0], vD:[0,1,0],
+   c:[[0,0,1],[1,0,1],[1,1,1],[0,1,1]]},
+  {n:[ 0,0,-1], shade:0.80, uD:[-1,0,0], vD:[0,1,0],
+   c:[[1,0,0],[0,0,0],[0,1,0],[1,1,0]]}
+];
+var TRI = [0,1,2, 0,2,3];
+var AO_LUT = [0.50, 0.68, 0.85, 1.00];
+
+/* 缓冲区池 */
+var oBuf = new Float32Array(400000), oPtr = 0;
+var tBuf = new Float32Array(160000), tPtr = 0;
+function growO(n){
+  if (oPtr+n <= oBuf.length) return;
+  var nc = oBuf.length; while (nc < oPtr+n) nc*=2;
+  var a = new Float32Array(nc); a.set(oBuf.subarray(0,oPtr)); oBuf = a;
+}
+function growT(n){
+  if (tPtr+n <= tBuf.length) return;
+  var nc = tBuf.length; while (nc < tPtr+n) nc*=2;
+  var a = new Float32Array(nc); a.set(tBuf.subarray(0,tPtr)); tBuf = a;
+}
+function pushO(x,y,z,u,v,b){
+  var m=oBuf,p=oPtr;
+  m[p]=x;m[p+1]=y;m[p+2]=z;m[p+3]=u;m[p+4]=v;m[p+5]=b;
+  oPtr=p+6;
+}
+function pushT(x,y,z,u,v,b){
+  var m=tBuf,p=tPtr;
+  m[p]=x;m[p+1]=y;m[p+2]=z;m[p+3]=u;m[p+4]=v;m[p+5]=b;
+  tPtr=p+6;
+}
+function vertexAO(wx,wy,wz,F,ci){
+  var du = (ci===1||ci===2)?1:-1;
+  var dv = (ci===2||ci===3)?1:-1;
+  var nx=wx+F.n[0], ny=wy+F.n[1], nz=wz+F.n[2];
+  var uD=F.uD, vD=F.vD;
+  var s1 = isOpaque(nx+uD[0]*du, ny+uD[1]*du, nz+uD[2]*du)?1:0;
+  var s2 = isOpaque(nx+vD[0]*dv, ny+vD[1]*dv, nz+vD[2]*dv)?1:0;
+  var co = isOpaque(nx+uD[0]*du+vD[0]*dv,
+                    ny+uD[1]*du+vD[1]*dv,
+                    nz+uD[2]*du+vD[2]*dv)?1:0;
+  if (s1 && s2) return 0;
+  return 3 - (s1+s2+co);
+}
+
+function buildChunkMesh(c){
+  /* 确保 3×3 邻居 */
+  for (var dz=-1;dz<=1;dz++)
+    for (var dx=-1;dx<=1;dx++){
+      var nc = getChunk(c.cx+dx, c.cz+dz);
+      if (!nc.data){ nc.data = new Uint8Array(CS3); genChunk(nc); nc.dirty = true; }
+    }
+  var d = c.data;
+  var bx = c.cx*CS, bz = c.cz*CS;
+  oPtr = 0; tPtr = 0;
+
+  for (var y=0;y<WH;y++){
+    var yb = y<<8;
+    for (var lz=0;lz<CS;lz++){
+      var zb = lz<<4;
+      for (var lx=0;lx<CS;lx++){
+        var id = d[yb|zb|lx];
+        if (id===AIR) continue;
+        var df = B[id];
+        if (!df) continue;
+        var wx = bx+lx, wz = bz+lz;
+        var isTrans = !df.opaque;
+
+        for (var f=0;f<6;f++){
+          var F = FACES[f];
+          var nx = wx+F.n[0], ny = y+F.n[1], nz = wz+F.n[2];
+          var nid = getBlock(nx,ny,nz);
+          if (nid===id) continue;
+          if (B[nid] && B[nid].opaque) continue;
+
+          var tname = (f===2) ? df.tTop : (f===3 ? df.tBot : df.tSide);
+          if (id===LEAVES) tname = CFG.leaves ? 'leaves' : 'leaves_solid';
+          var ti = TEX_IDX[tname];
+          if (ti===undefined) ti = 0;
+          var uv = TEX_UV[ti];
+          var sh = F.shade, cn = F.c;
+
+          if (isTrans) growT(36); else growO(36);
+          for (var k=0;k<6;k++){
+            var ci = TRI[k];
+            var p = cn[ci];
+            var ao = AO_LUT[vertexAO(wx,y,wz,F,ci)];
+            var br = sh*ao;
+            var uu, vv;
+            if (f===2||f===3){ uu = (ci===1||ci===2)?uv.u1:uv.u0; vv = (ci===2||ci===3)?uv.v1:uv.v0; }
+            else if (f===0||f===1){ uu = (ci===1||ci===2)?uv.u1:uv.u0; vv = (ci===2||ci===3)?uv.v1:uv.v0; }
+            else { uu = (ci===1||ci===2)?uv.u1:uv.u0; vv = (ci===2||ci===3)?uv.v1:uv.v0; }
+            if (isTrans) pushT(wx+p[0], y+p[1], wz+p[2], uu, vv, br);
+            else         pushO(wx+p[0], y+p[1], wz+p[2], uu, vv, br);
+          }
+        }
+      }
+    }
+  }
+  if (c.vboO){ gl.deleteBuffer(c.vboO); c.vboO = null; }
+  c.cntO = 0;
+  if (oPtr > 0){
+    var vo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vo);
+    gl.bufferData(gl.ARRAY_BUFFER, oBuf.subarray(0,oPtr), gl.STATIC_DRAW);
+    c.vboO = vo; c.cntO = oPtr/6;
+  }
+  if (c.vboT){ gl.deleteBuffer(c.vboT); c.vboT = null; }
+  c.cntT = 0;
+  if (tPtr > 0){
+    var vt = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vt);
+    gl.bufferData(gl.ARRAY_BUFFER, tBuf.subarray(0,tPtr), gl.STATIC_DRAW);
+    c.vboT = vt; c.cntT = tPtr/6;
+  }
+  c.dirty = false;
+}
+
+/* =========================================================
+   沙子重力
+   ========================================================= */
+function setRaw(px,py,pz,id2){
+  if (py<0||py>=WH) return;
+  var c = getChunk(px>>4, pz>>4);
+  if (!c.data) return;
+  c.data[(py<<8)|((pz&15)<<4)|(px&15)] = id2;
+  c.dirty = true;
+  c.modified = true;
+}
+function fallSand(x,y,z){
+  if (getBlock(x,y,z) !== SAND) return;
+  var ny = y;
+  while (ny > 0){
+    var b = getBlock(x, ny-1, z);
+    if (b === AIR || b === WATER) ny--;
+    else break;
+  }
+  if (ny === y) return;
+  setRaw(x, y, z, AIR);
+  setRaw(x, ny, z, SAND);
+  markDirtyAround(x, z);
+  fallSand(x, y+1, z);
+}
+function markDirtyAround(x, z){
+  var cx = x>>4, cz = z>>4;
+  for (var dz=-1;dz<=1;dz++)
+    for (var dx=-1;dx<=1;dx++){
+      var c = chunks.get(ckey(cx+dx, cz+dz));
+      if (c) c.dirty = true;
+    }
+}
+
+/* =========================================================
+   玩家
+   ========================================================= */
+var P = {x:0.5, y:60, z:0.5, vx:0, vy:0, vz:0, onGround:false, yaw:0, pitch:0};
+var PW = 0.3, PH = 1.8, EYE = 1.62;
+
+function solidAt(x,y,z){ var id = getBlock(x,y,z); return B[id] ? B[id].solid : false; }
+function collidesAt(px,py,pz){
+  var x0=Math.floor(px-PW), x1=Math.floor(px+PW);
+  var y0=Math.floor(py),     y1=Math.floor(py+PH-0.001);
+  var z0=Math.floor(pz-PW), z1=Math.floor(pz+PW);
+  if (y1<0) return false;
+  if (y0<0) y0=0;
+  if (y0>=WH) return false;
+  for (var y=y0;y<=y1&&y<WH;y++)
+    for (var z=z0;z<=z1;z++)
+      for (var x=x0;x<=x1;x++)
+        if (solidAt(x,y,z)) return true;
+  return false;
+}
+function collidesSelf(){ return collidesAt(P.x,P.y,P.z); }
+function grounded(){
+  var y = Math.floor(P.y-0.06);
+  if (y<0) return false;
+  var x0=Math.floor(P.x-PW), x1=Math.floor(P.x+PW);
+  var z0=Math.floor(P.z-PW), z1=Math.floor(P.z+PW);
+  for (var x=x0;x<=x1;x++) for (var z=z0;z<=z1;z++)
+    if (solidAt(x,y,z)) return true;
+  return false;
+}
+function moveWithCollision(dx,dy,dz){
+  var mx = Math.max(Math.abs(dx),Math.abs(dy),Math.abs(dz));
+  var steps = Math.max(1, Math.ceil(mx/0.16));
+  var sx=dx/steps, sy=dy/steps, sz=dz/steps;
+  for (var i=0;i<steps;i++){
+    if (sx){ P.x+=sx; if (collidesSelf()){ P.x-=sx; P.vx=0; } }
+    if (sz){ P.z+=sz; if (collidesSelf()){ P.z-=sz; P.vz=0; } }
+    if (sy){
+      P.y+=sy;
+      if (collidesSelf()){ P.y-=sy; if (sy<0) P.onGround=true; P.vy=0; }
+    }
+  }
+}
+function findSpawn(){
+  for (var ring=0;ring<80;ring++){
+    var rad = ring*5;
+    var n = Math.max(1, ring*6);
+    for (var a=0;a<n;a++){
+      var ang = a/n*Math.PI*2;
+      var wx = Math.round(Math.cos(ang)*rad);
+      var wz = Math.round(Math.sin(ang)*rad);
+      var h = terrainHeight(wx,wz);
+      if (h > SEA+3){ P.x = wx+0.5; P.z = wz+0.5; P.y = h+1.5; return; }
+    }
+  }
+  P.x = 0.5; P.z = 0.5; P.y = WH-10;
+}
+
+/* =========================================================
+   射线
+   ========================================================= */
+function raycast(maxD){
+  var ox=P.x, oy=P.y+EYE, oz=P.z;
+  var cy=Math.cos(P.yaw), sy=Math.sin(P.yaw);
+  var cp=Math.cos(P.pitch), sp=Math.sin(P.pitch);
+  var dx=-sy*cp, dy=sp, dz=-cy*cp;
+  var x=Math.floor(ox), y=Math.floor(oy), z=Math.floor(oz);
+  var stx = dx>0?1:(dx<0?-1:0);
+  var sty = dy>0?1:(dy<0?-1:0);
+  var stz = dz>0?1:(dz<0?-1:0);
+  var INF = 1e30;
+  var tdx = dx?Math.abs(1/dx):INF, tdy = dy?Math.abs(1/dy):INF, tdz = dz?Math.abs(1/dz):INF;
+  var tmx = dx?((stx>0?x+1-ox:x-ox)/dx):INF;
+  var tmy = dy?((sty>0?y+1-oy:y-oy)/dy):INF;
+  var tmz = dz?((stz>0?z+1-oz:z-oz)/dz):INF;
+  var nx=0,ny=0,nz=0,t=0,g=0;
+  while (g++<320){
+    var id = getBlock(x,y,z);
+    if (id!==AIR && B[id].solid) return {hit:true,x:x,y:y,z:z,nx:nx,ny:ny,nz:nz};
+    if (tmx<tmy && tmx<tmz){ x+=stx; t=tmx; tmx+=tdx; nx=-stx; ny=0; nz=0; }
+    else if (tmy<tmz){ y+=sty; t=tmy; tmy+=tdy; nx=0; ny=-sty; nz=0; }
+    else { z+=stz; t=tmz; tmz+=tdz; nx=0; ny=0; nz=-stz; }
+    if (t>maxD) break;
+  }
+  return {hit:false};
+}
+
+/* =========================================================
+   方块操作
+   ========================================================= */
+var S = {keys:{}, tf:0, ts:0, sel:GRASS};
+var gravityQueue = [];
+
+function setBlockWorld(wx,wy,wz,id){
+  if (wy<0||wy>=WH) return;
+  var c = getChunk(wx>>4, wz>>4);
+  if (!c.data){ c.data = new Uint8Array(CS3); genChunk(c); }
+  c.data[(wy<<8)|((wz&15)<<4)|(wx&15)] = id;
+  c.dirty = true;
+  c.modified = true;
+  var cx = wx>>4, cz = wz>>4;
+  var lx = wx&15, lz = wz&15;
+  if (lx===0){ var n=chunks.get(ckey(cx-1,cz)); if(n)n.dirty=true; }
+  if (lx===15){ var n2=chunks.get(ckey(cx+1,cz)); if(n2)n2.dirty=true; }
+  if (lz===0){ var n3=chunks.get(ckey(cx,cz-1)); if(n3)n3.dirty=true; }
+  if (lz===15){ var n4=chunks.get(ckey(cx,cz+1)); if(n4)n4.dirty=true; }
+}
+
+function blockHitsPlayer(bx,by,bz){
+  return (bx+1>P.x-PW && bx<P.x+PW &&
+          by+1>P.y    && by<P.y+PH &&
+          bz+1>P.z-PW && bz<P.z+PW);
+}
+function doBreak(){
+  var r = raycast(6);
+  if (!r.hit) return;
+  if (r.y === 0) return;
+  setBlockWorld(r.x, r.y, r.z, AIR);
+  gravityQueue.push([r.x, r.y+1, r.z]);
+}
+function doPlace(){
+  var r = raycast(6);
+  if (!r.hit) return;
+  var px=r.x+r.nx, py=r.y+r.ny, pz=r.z+r.nz;
+  if (py<0||py>=WH) return;
+  if (getBlock(px,py,pz)!==AIR) return;
+  if (blockHitsPlayer(px,py,pz)) return;
+  setBlockWorld(px,py,pz,S.sel);
+  gravityQueue.push([px, py, pz]);
+}
+function doJump(){ if (P.onGround){ P.vy = 8.5; P.onGround = false; } }
+function clampPitch(){
+  var L = Math.PI/2 - 0.02;
+  if (P.pitch >  L) P.pitch =  L;
+  if (P.pitch < -L) P.pitch = -L;
+}
+function processGravity(){
+  var n = 0;
+  while (gravityQueue.length > 0 && n++ < 32){
+    var g = gravityQueue.shift();
+    fallSand(g[0], g[1], g[2]);
+  }
+}
+
+/* =========================================================
+   输入
+   ========================================================= */
+var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+var SENS = 1.0;
+var DIGIT = {Digit1:GRASS,Digit2:DIRT,Digit3:STONE,Digit4:COBBLE,
+             Digit5:LOG,Digit6:LEAVES,Digit7:SAND,Digit8:PLANKS,Digit9:GLASS};
+
+window.addEventListener('keydown', function(e){
+  S.keys[e.code] = true;
+  if (e.code==='Space'){ e.preventDefault(); doJump(); }
+  if (e.code==='Escape'){ togglePause(); }
+  if (DIGIT[e.code]!==undefined){ S.sel = DIGIT[e.code]; buildHotbar(); }
+});
+window.addEventListener('keyup', function(e){ S.keys[e.code] = false; });
+
+var locked = false;
+document.addEventListener('pointerlockchange', function(){
+  locked = (document.pointerLockElement === canvas);
+  var t = $('tip'); if (t) t.style.display = locked ? 'none' : '';
+});
+if (!isTouch){
+  canvas.addEventListener('click', function(){
+    if (!locked && canvas.requestPointerLock) canvas.requestPointerLock();
+  });
+  document.addEventListener('mousemove', function(e){
+    if (!locked) return;
+    P.yaw   -= e.movementX * 0.0022 * SENS;
+    P.pitch -= e.movementY * 0.0022 * SENS;
+    clampPitch();
+  });
+  document.addEventListener('mousedown', function(e){
+    if (!locked) return;
+    if (e.button === 0) doBreak();
+    else if (e.button === 2) doPlace();
+  });
+  canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+}
+
+/* 触摸 */
+var joyEl = $('joy'), joyKnob = $('joyKnob');
+var lookId=null, lookLX=0, lookLY=0;
+var moveId=null, joyOX=0, joyOY=0;
+var JOY_R = 48, JOY_DEAD = 0.12;
+function showJoy(cx,cy){
+  joyOX=cx; joyOY=cy;
+  joyEl.style.display='block';
+  joyEl.style.left = (cx-55)+'px'; joyEl.style.top = (cy-55)+'px';
+  joyKnob.style.left='50%'; joyKnob.style.top='50%';
+}
+function hideJoy(){ joyEl.style.display='none'; S.tf=0; S.ts=0; }
+
+canvas.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  for (var i=0;i<e.changedTouches.length;i++){
+    var t = e.changedTouches[i];
+    if (moveId===null && t.clientX < innerWidth*0.45 && t.clientY > innerHeight*0.42){
+      moveId = t.identifier; showJoy(t.clientX, t.clientY);
+    } else if (lookId===null){
+      lookId = t.identifier; lookLX = t.clientX; lookLY = t.clientY;
+    }
+  }
+}, {passive:false});
+canvas.addEventListener('touchmove', function(e){
+  e.preventDefault();
+  for (var i=0;i<e.changedTouches.length;i++){
+    var t = e.changedTouches[i];
+    if (t.identifier === moveId){
+      var dx = t.clientX - joyOX, dy = t.clientY - joyOY;
+      var L = Math.sqrt(dx*dx+dy*dy);
+      if (L > JOY_R){ dx = dx/L*JOY_R; dy = dy/L*JOY_R; }
+      joyKnob.style.left = (55+dx)+'px'; joyKnob.style.top = (55+dy)+'px';
+      var nx = dx/JOY_R, ny = dy/JOY_R;
+      if (Math.abs(nx)<JOY_DEAD) nx = 0;
+      if (Math.abs(ny)<JOY_DEAD) ny = 0;
+      S.ts = nx*Math.abs(nx)*0.7 + nx*0.3;
+      S.tf = -(ny*Math.abs(ny)*0.7 + ny*0.3);
+    } else if (t.identifier === lookId){
+      P.yaw   -= (t.clientX - lookLX) * 0.0055 * SENS;
+      P.pitch -= (t.clientY - lookLY) * 0.0055 * SENS;
+      lookLX = t.clientX; lookLY = t.clientY;
+      clampPitch();
+    }
+  }
+}, {passive:false});
+function endTouch(e){
+  for (var i=0;i<e.changedTouches.length;i++){
+    var t = e.changedTouches[i];
+    if (t.identifier === moveId){ moveId=null; hideJoy(); }
+    else if (t.identifier === lookId) lookId=null;
+  }
+}
+canvas.addEventListener('touchend', endTouch, {passive:false});
+canvas.addEventListener('touchcancel', endTouch, {passive:false});
+
+function bindBtn(id, fn, rep){
+  var el = $(id); if (!el) return;
+  var timer = null;
+  function down(e){ if(e){e.preventDefault();e.stopPropagation();} fn();
+    if (rep) timer = setInterval(fn, rep); }
+  function up(e){ if(e){e.preventDefault();e.stopPropagation();}
+    if (timer){ clearInterval(timer); timer=null; } }
+  el.addEventListener('touchstart', down, {passive:false});
+  el.addEventListener('touchend', up, {passive:false});
+  el.addEventListener('touchcancel', up, {passive:false});
+  el.addEventListener('mousedown', down);
+  el.addEventListener('mouseup', up);
+  el.addEventListener('mouseleave', up);
+}
+bindBtn('btnBreak', doBreak, 200);
+bindBtn('btnPlace', doPlace, 0);
+bindBtn('btnJump', doJump, 0);
+
+/* =========================================================
+   物品栏
+   ========================================================= */
+var HOTBAR = [GRASS,DIRT,STONE,COBBLE,LOG,LEAVES,SAND,PLANKS,GLASS];
+var hotbarEl = $('hotbar');
+function buildHotbar(){
+  hotbarEl.innerHTML = '';
+  for (var i=0;i<HOTBAR.length;i++){
+    (function(type){
+      var slot = document.createElement('div');
+      slot.className = 'slot' + (type === S.sel ? ' sel' : '');
+      var img = document.createElement('img');
+      var tname = B[type].tTop;
+      if (type === LEAVES) tname = CFG.leaves ? 'leaves' : 'leaves_solid';
+      img.src = TEX[tname] || TEX[B[type].tSide];
+      slot.appendChild(img);
+      slot.addEventListener('touchstart', function(e){
+        e.preventDefault(); e.stopPropagation();
+        S.sel = type; buildHotbar();
+      }, {passive:false});
+      slot.addEventListener('mousedown', function(e){
+        e.stopPropagation(); S.sel = type; buildHotbar();
+      });
+      hotbarEl.appendChild(slot);
+    })(HOTBAR[i]);
+  }
+}
+
+/* =========================================================
+   区块调度
+   ========================================================= */
+var lastChunkX = -9999, lastChunkZ = -9999;
+function updateChunks(force){
+  var pcx = Math.floor(P.x/CS), pcz = Math.floor(P.z/CS);
+  if (!force && pcx === lastChunkX && pcz === lastChunkZ) return 0;
+  lastChunkX = pcx; lastChunkZ = pcz;
+  var R = renderDist, RC = R+2, loaded = 0;
+  for (var dz=-R;dz<=R;dz++){
+    for (var dx=-R;dx<=R;dx++){
+      if (dx*dx + dz*dz > R*R + R) continue;
+      var cx = pcx+dx, cz = pcz+dz;
+      var k = ckey(cx,cz);
+      if (!chunks.has(k)){
+        var c = {cx:cx, cz:cz, data:null, vboO:null, cntO:0, vboT:null, cntT:0,
+                 dirty:true, modified:false};
+        c.data = new Uint8Array(CS3);
+        genChunk(c);
+        chunks.set(k, c);
+        loaded++;
+      }
+    }
+  }
+  var del = null;
+  chunks.forEach(function(c, k){
+    var ddx = c.cx-pcx, ddz = c.cz-pcz;
+    if (ddx*ddx + ddz*ddz > RC*RC){
+      if (c.vboO) gl.deleteBuffer(c.vboO);
+      if (c.vboT) gl.deleteBuffer(c.vboT);
+      (del||(del=[])).push(k);
+    }
+  });
+  if (del) for (var i=0;i<del.length;i++) chunks.delete(del[i]);
+  return loaded;
+}
+
+function processBuild(budget){
+  var n = 0;
+  chunks.forEach(function(c){
+    if (n >= budget) return;
+    if (c.dirty){ buildChunkMesh(c); n++; }
+  });
+  return n;
+}
+
+/* =========================================================
+   分辨率
+   ========================================================= */
+var MAX_PIXELS = 2.4e6;
+var quality = 1.0;
+function applySize(){
+  var w = innerWidth, h = innerHeight;
+  var dpr = Math.min(devicePixelRatio||1, 2.0);
+  var s = dpr * quality;
+  var px = w*h*s*s;
+  if (px > MAX_PIXELS) s *= Math.sqrt(MAX_PIXELS/px);
+  if (s < 0.35) s = 0.35;
+  canvas.width  = Math.max(1, Math.round(w*s));
+  canvas.height = Math.max(1, Math.round(h*s));
+  canvas.style.width  = w+'px';
+  canvas.style.height = h+'px';
+  gl.viewport(0,0,canvas.width,canvas.height);
+}
+addEventListener('resize', applySize);
+addEventListener('orientationchange', function(){ setTimeout(applySize,220); });
+
+/* =========================================================
+   更新
+   ========================================================= */
+function update(dt){
+  var kf=0, ks=0, K = S.keys;
+  if (K['KeyW']||K['ArrowUp'])    kf += 1;
+  if (K['KeyS']||K['ArrowDown'])  kf -= 1;
+  if (K['KeyD']||K['ArrowRight']) ks += 1;
+  if (K['KeyA']||K['ArrowLeft'])  ks -= 1;
+
+  if (Math.abs(S.tf)>0.02 || Math.abs(S.ts)>0.02){ kf = S.tf; ks = S.ts; }
+  var L = Math.sqrt(kf*kf + ks*ks);
+  if (L > 1){ kf /= L; ks /= L; }
+
+  var cy = Math.cos(P.yaw), sy = Math.sin(P.yaw);
+  var wx = -sy*kf + cy*ks;
+  var wz = -cy*kf - sy*ks;
+
+  var SPD = 4.6;
+  var tVX = wx*SPD, tVZ = wz*SPD;
+  var rate = P.onGround ? 22 : 6;
+  var f = 1 - Math.exp(-rate*dt);
+  P.vx += (tVX - P.vx) * f;
+  P.vz += (tVZ - P.vz) * f;
+
+  P.vy -= 27*dt;
+  if (P.vy < -35) P.vy = -35;
+
+  P.onGround = false;
+  moveWithCollision(P.vx*dt, P.vy*dt, P.vz*dt);
+
+  if (!P.onGround && P.vy <= 0 && grounded()){ P.onGround = true; P.vy = 0; }
+  if (P.y < 0.5){ P.y = 0.5; P.vy = 0; P.onGround = true; }
+  if (P.y < -20) findSpawn();
+
+  processGravity();
+}
+
+/* =========================================================
+   渲染（含可见区块缓存）
+   ========================================================= */
+var visibleList = [];
+var visCamX = -9999, visCamZ = -9999, visYaw = -9999, visPitch = -9999;
+var drawn = 0;
+
+function updateVisible(){
+  var dx = P.x - visCamX, dz = P.z - visCamZ;
+  var dy = P.yaw - visYaw, dp = P.pitch - visPitch;
+  if (dx*dx + dz*dz < 4 && Math.abs(dy) < 0.03 && Math.abs(dp) < 0.03){
+    return;
+  }
+  visCamX = P.x; visCamZ = P.z; visYaw = P.yaw; visPitch = P.pitch;
+
+  extractFrustum();
+  visibleList.length = 0;
+  var far = renderDist*16;
+  var maxD2 = (far+12)*(far+12);
+  var ex = P.x, ez = P.z;
+
+  chunks.forEach(function(c){
+    if (!c.vboO && !c.vboT) return;
+    var minX = c.cx*16, minZ = c.cz*16;
+    var cmx = minX+8, cmz = minZ+8;
+    var ddx = cmx-ex, ddz = cmz-ez;
+    var d2 = ddx*ddx + ddz*ddz;
+    if (d2 > maxD2) return;
+    if (!boxVisible(minX,0,minZ, minX+16,WH,minZ+16)) return;
+    visibleList.push({c:c, d:d2});
+  });
+  visibleList.sort(function(a,b){ return a.d - b.d; });
+  drawn = visibleList.length;
+}
+
+function render(){
+  var aspect = canvas.width/Math.max(1,canvas.height);
+  perspective(mProj, Math.PI/180*CFG.fov, aspect, 0.08, renderDist*16 + 40);
+
+  var cy = Math.cos(P.yaw), sy = Math.sin(P.yaw);
+  var cp = Math.cos(P.pitch), sp = Math.sin(P.pitch);
+  var fx = -sy*cp, fy = sp, fz = -cy*cp;
+  var rx = cy, ry = 0, rz = -sy;
+  var ux = ry*fz - rz*fy, uy = rz*fx - rx*fz, uz = rx*fy - ry*fx;
+  var ex = P.x, ey = P.y+EYE, ez = P.z;
+
+  var v = mView;
+  v[0]=rx;  v[4]=ry;  v[8] =rz;
+  v[1]=ux;  v[5]=uy;  v[9] =uz;
+  v[2]=-fx; v[6]=-fy; v[10]=-fz;
+  v[3]=0;   v[7]=0;   v[11]=0;
+  v[12]=-(rx*ex+ry*ey+rz*ez);
+  v[13]=-(ux*ex+uy*ey+uz*ez);
+  v[14]= (fx*ex+fy*ey+fz*ez);
+  v[15]=1;
+
+  updateVisible();
+
+  gl.clearColor(0.557,0.773,0.910,1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+  gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); gl.frontFace(gl.CCW);
+
+  gl.useProgram(prog);
+  gl.uniformMatrix4fv(uProj, false, mProj);
+  gl.uniformMatrix4fv(uView, false, mView);
+  gl.uniform3f(uFog, 0.557,0.773,0.910);
+  var far = renderDist*16;
+  gl.uniform1f(uFogNear, far*0.55);
+  gl.uniform1f(uFogFar,  far*0.98);
+
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, atlasTex);
+  gl.uniform1i(uTex, 0);
+
+  gl.enableVertexAttribArray(aPos);
+  gl.enableVertexAttribArray(aUV);
+  gl.enableVertexAttribArray(aBright);
+
+  /* 不透明 */
+  for (var i=0;i<visibleList.length;i++){
+    var c = visibleList[i].c;
+    if (!c.vboO || c.cntO===0) continue;
+    gl.bindBuffer(gl.ARRAY_BUFFER, c.vboO);
+    gl.vertexAttribPointer(aPos,    3, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(aUV,     2, gl.FLOAT, false, 24, 12);
+    gl.vertexAttribPointer(aBright, 1, gl.FLOAT, false, 24, 20);
+    gl.drawArrays(gl.TRIANGLES, 0, c.cntO);
+  }
+  /* 透明 */
+  for (var j=0;j<visibleList.length;j++){
+    var c2 = visibleList[j].c;
+    if (!c2.vboT || c2.cntT===0) continue;
+    gl.bindBuffer(gl.ARRAY_BUFFER, c2.vboT);
+    gl.vertexAttribPointer(aPos,    3, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(aUV,     2, gl.FLOAT, false, 24, 12);
+    gl.vertexAttribPointer(aBright, 1, gl.FLOAT, false, 24, 20);
+    gl.drawArrays(gl.TRIANGLES, 0, c2.cntT);
+  }
+}
+
+/* =========================================================
+   FPS
+   ========================================================= */
+var frameT = [];
+var fps = 0, frameMs = 0, fpsMin = 9999, fpsMax = 0;
+var infoEl = $('info');
+function recFrame(t){
+  frameT.push(t);
+  if (frameT.length > 50) frameT.shift();
+  if (frameT.length > 2){
+    var span = frameT[frameT.length-1] - frameT[0];
+    if (span > 0){
+      fps = (frameT.length-1)*1000/span;
+      frameMs = span/(frameT.length-1);
+    }
+  }
+}
+
+/* =========================================================
+   主循环
+   ========================================================= */
+var lastT=0, infoT=0, resT=0, running=false;
+
+function loop(now){
+  if (!running) return;
+  if (!lastT) lastT = now;
+  var dt = (now-lastT)/1000;
+  lastT = now;
+  if (dt > 0.08) dt = 0.08;
+
+  recFrame(now);
+  update(dt);
+
+  updateChunks(false);
+  processBuild(CFG.perf === 2 ? 1 : 2);
+
+  render();
+
+  resT += dt;
+  if (resT > 1.8){
+    resT = 0;
+    if (fps > 0 && CFG.perf !== 0){
+      if (fps < 44 && quality > 0.5){ quality = Math.max(0.5, quality*0.85); applySize(); frameT.length=0; }
+      else if (fps > 57 && quality < 1.0){ quality = Math.min(1.0, quality*1.07); applySize(); frameT.length=0; }
+    }
+  }
+
+  infoT += dt;
+  if (infoT >= 0.32){
+    infoT = 0;
+    if (fps > 0){ if (fps < fpsMin) fpsMin = fps; if (fps > fpsMax) fpsMax = fps; }
+    var bx = Math.floor(P.x), by = Math.floor(P.y), bz = Math.floor(P.z);
+    var yawDeg = ((P.yaw*57.2958)%360+360)%360;
+    var dirs = ['南','西南','西','西北','北','东北','东','东南'];
+    var di = Math.round(yawDeg/45)%8;
+    infoEl.textContent =
+      'MiniCraft Bedrock · Seed ' + SEED + '\n' +
+      'XYZ: ' + P.x.toFixed(2)+' / '+P.y.toFixed(2)+' / '+P.z.toFixed(2) + '\n' +
+      'Block: ' + bx + ' ' + by + ' ' + bz + '\n' +
+      'Chunk: ' + (bx>>4) + ' ' + (bz>>4) + '\n' +
+      'Facing: ' + dirs[di] + ' (' + yawDeg.toFixed(0) + '° / ' + (P.pitch*57.2958).toFixed(0) + '°)\n' +
+      'FPS: ' + fps.toFixed(1) + ' (' + frameMs.toFixed(1) + ' ms)\n' +
+      '低/高: ' + fpsMin.toFixed(0) + ' / ' + fpsMax.toFixed(0) + '\n' +
+      'Chunks: ' + chunks.size + ' / ' + drawn + ' drawn\n' +
+      'R=' + renderDist + ' | ' + canvas.width + '×' + canvas.height + ' Q=' + quality.toFixed(2);
+  }
+  requestAnimationFrame(loop);
+}
+
+/* =========================================================
+   配置
+   ========================================================= */
+var CFG = {ram:2048, dist:6, leaves:1, sens:100, fov:70, perf:1};
+(function loadCFG(){
+  var raw = getCookie('mc_cfg2');
+  if (raw){ try{ var o = JSON.parse(raw);
+    for (var k in o) if (CFG.hasOwnProperty(k) && typeof o[k]==='number') CFG[k]=o[k];
+  }catch(e){} }
+  SENS = CFG.sens/100;
+})();
+function saveCFG(){ try{ setCookie('mc_cfg2', JSON.stringify(CFG), 365); }catch(e){} }
+
+/* =========================================================
+   存档系统
+   ========================================================= */
+var worldName = '新的世界';
+var currentWorldId = null;
+
+function listWorlds(){
+  try{
+    var raw = localStorage.getItem('mc_worlds');
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveWorlds(list){
+  try{ localStorage.setItem('mc_worlds', JSON.stringify(list)); }catch(e){}
+}
+
+function captureThumb(){
+  try{
+    render();
+    var tc = document.createElement('canvas');
+    tc.width = 160; tc.height = 90;
+    var ctx = tc.getContext('2d');
+    ctx.drawImage(canvas, 0, 0, 160, 90);
+    return tc.toDataURL('image/jpeg', 0.6);
+  }catch(e){ return ''; }
+}
+
+function serializeWorld(){
+  var obj = {
+    v: 1,
+    name: worldName,
+    seed: SEED,
+    time: Date.now(),
+    player: {x:P.x, y:P.y, z:P.z, yaw:P.yaw, pitch:P.pitch},
+    renderDist: renderDist,
+    chunks: {}
+  };
+  chunks.forEach(function(c, k){
+    if (!c.modified || !c.data) return;
+    var rle = rleEnc(c.data);
+    obj.chunks[k] = b64enc(rle);
+  });
+  return obj;
+}
+
+function deserializeWorld(obj){
+  SEED = obj.seed || 0;
+  worldName = obj.name || '未知世界';
+  if (obj.player){
+    P.x = obj.player.x; P.y = obj.player.y; P.z = obj.player.z;
+    P.yaw = obj.player.yaw || 0; P.pitch = obj.player.pitch || 0;
+    P.vx = 0; P.vy = 0; P.vz = 0;
+  }
+  if (obj.renderDist){ renderDist = obj.renderDist; CFG.dist = obj.renderDist; }
+  if (obj.chunks){
+    for (var k in obj.chunks){
+      var parts = k.split(',');
+      var cx = parseInt(parts[0],10), cz = parseInt(parts[1],10);
+      var c = getChunk(cx, cz);
+      if (!c.data){ c.data = new Uint8Array(CS3); genChunk(c); }
+      try{
+        var rle = b64dec(obj.chunks[k]);
+        var dec = rleDec(rle, CS3);
+        c.data.set(dec);
+        c.modified = true;
+        c.dirty = true;
+      }catch(e){}
+    }
+  }
+}
+
+function saveToLocal(){
+  try{
+    var obj = serializeWorld();
+    var thumb = captureThumb();
+    if (!currentWorldId) currentWorldId = 'w_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+    var key = 'mc_world_' + currentWorldId;
+    localStorage.setItem(key, JSON.stringify(obj));
+    localStorage.setItem(key + '_thumb', thumb);
+
+    var list = listWorlds();
+    var found = false;
+    for (var i=0;i<list.length;i++){
+      if (list[i].id === currentWorldId){
+        list[i].name = obj.name;
+        list[i].updated = obj.time;
+        list[i].seed = obj.seed;
+        found = true;
+        break;
+      }
+    }
+    if (!found){
+      list.push({id:currentWorldId, name:obj.name, updated:obj.time, seed:obj.seed});
+    }
+    saveWorlds(list);
+    return true;
+  }catch(e){
+    console.error(e);
+    return false;
+  }
+}
+
+function loadFromLocal(id){
+  try{
+    var raw = localStorage.getItem('mc_world_' + id);
+    if (!raw) return false;
+    var obj = JSON.parse(raw);
+    deserializeWorld(obj);
+    currentWorldId = id;
+    return true;
+  }catch(e){
+    console.error(e);
+    return false;
+  }
+}
+
+function deleteLocal(id){
+  try{
+    localStorage.removeItem('mc_world_' + id);
+    localStorage.removeItem('mc_world_' + id + '_thumb');
+    var list = listWorlds().filter(function(w){ return w.id !== id; });
+    saveWorlds(list);
+  }catch(e){}
+}
+
+function exportWorld(){
+  var obj = serializeWorld();
+  var thumb = captureThumb();
+  var mods = {mods:[]};
+  var enc = new TextEncoder();
+  var thumbData;
+  if (thumb && thumb.indexOf('base64,') >= 0){
+    var b64 = thumb.split(',')[1];
+    var bin = atob(b64);
+    thumbData = new Uint8Array(bin.length);
+    for (var i=0;i<bin.length;i++) thumbData[i] = bin.charCodeAt(i);
+  } else {
+    thumbData = new Uint8Array(0);
+  }
+  var files = [
+    {name:'save.json', data: enc.encode(JSON.stringify(obj))},
+    {name:'thumbnail.jpg', data: thumbData},
+    {name:'mods.json', data: enc.encode(JSON.stringify(mods))}
+  ];
+  var zipBytes = zipCreate(files);
+  var blob = new Blob([zipBytes], {type:'application/octet-stream'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (worldName || 'world').replace(/[\\/:*?"<>|]/g,'_') + '.wmp';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+function importWorld(file, cb){
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var bytes = new Uint8Array(ev.target.result);
+      var entries = zipRead(bytes);
+      var saveEntry = null;
+      for (var i=0;i<entries.length;i++){
+        if (entries[i].name === 'save.json'){ saveEntry = entries[i]; break; }
+      }
+      if (!saveEntry) throw new Error('缺少 save.json');
+      if (saveEntry.method === 8){
+        inflateRaw(saveEntry.data).then(function(data){
+          var txt = new TextDecoder().decode(data);
+          var obj = JSON.parse(txt);
+          finishImport(obj, cb);
+        }).catch(function(e){ cb(e); });
+      } else {
+        var txt = new TextDecoder().decode(saveEntry.data);
+        var obj = JSON.parse(txt);
+        finishImport(obj, cb);
+      }
+    }catch(e){ cb(e); }
+  };
+  reader.onerror = function(){ cb(new Error('读取失败')); };
+  reader.readAsArrayBuffer(file);
+}
+
+function finishImport(obj, cb){
+  try{
+    var newId = 'w_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+    localStorage.setItem('mc_world_' + newId, JSON.stringify(obj));
+    var list = listWorlds();
+    list.push({id:newId, name:obj.name||'导入世界', updated:obj.time||Date.now(), seed:obj.seed||0});
+    saveWorlds(list);
+    cb(null);
+  }catch(e){ cb(e); }
+}
+
+/* =========================================================
+   UI 交互
+   ========================================================= */
+function showScreen(id){
+  var els = document.querySelectorAll('.screen');
+  for (var i=0;i<els.length;i++) els[i].classList.remove('on');
+  if (id) $(id).classList.add('on');
+}
+
+/* 创建世界 */
+$('btnNewWorld').addEventListener('click', function(){
+  $('nwName').value = '新的世界';
+  $('nwSeed').value = '';
+  $('nwSeedInfo').textContent = '随机';
+  $('nwRam').value = CFG.ram;
+  $('nwDist').value = CFG.dist;
+  $('nwRamInfo').textContent = CFG.ram + ' MB';
+  $('nwDistInfo').textContent = CFG.dist + ' 区块';
+  showScreen('dlgNew');
+});
+$('nwRam').addEventListener('input', function(){
+  var v = parseInt(this.value,10);
+  $('nwRamInfo').textContent = v + ' MB';
+  var d;
+  if (v <= 768) d = 3; else if (v <= 1536) d = 4;
+  else if (v <= 2560) d = 5; else if (v <= 4096) d = 6;
+  else if (v <= 6144) d = 8; else if (v <= 8192) d = 10; else d = 12;
+  $('nwDist').value = d;
+  $('nwDistInfo').textContent = d + ' 区块';
+});
+$('nwDist').addEventListener('input', function(){
+  $('nwDistInfo').textContent = parseInt(this.value,10) + ' 区块';
+});
+$('nwSeed').addEventListener('input', function(){
+  var v = this.value.trim();
+  if (v){ $('nwSeedInfo').textContent = '自定义'; }
+  else  { $('nwSeedInfo').textContent = '随机'; }
+});
+$('btnCancelNew').addEventListener('click', function(){ showScreen('menu'); });
+$('btnDoCreate').addEventListener('click', function(){
+  var name = $('nwName').value.trim() || '新的世界';
+  var seedStr = $('nwSeed').value.trim();
+  var seed;
+  if (seedStr){
+    var n = parseInt(seedStr,10);
+    if (!isNaN(n)) seed = n;
+    else {
+      /* 字符串种子 */
+      seed = 0;
+      for (var i=0;i<seedStr.length;i++) seed = (seed*31 + seedStr.charCodeAt(i)) | 0;
+      seed = Math.abs(seed) % 2147483647;
+    }
+  } else {
+    seed = randSeed();
+  }
+  CFG.ram = parseInt($('nwRam').value,10);
+  CFG.dist = parseInt($('nwDist').value,10);
+  saveCFG();
+  worldName = name;
+  SEED = seed;
+  currentWorldId = null;
+  startGame();
+});
+
+/* 存档列表 */
+$('btnLoadWorld').addEventListener('click', function(){
+  renderWorldList();
+  showScreen('dlgList');
+});
+$('btnBackList').addEventListener('click', function(){ showScreen('menu'); });
+
+function renderWorldList(){
+  var list = listWorlds();
+  var box = $('worldListContent');
+  if (list.length === 0){
+    box.innerHTML = '<div class="empty">还没有存档<br>点击"创建新世界"开始游戏</div>';
+    return;
+  }
+  list.sort(function(a,b){ return (b.updated||0)-(a.updated||0); });
+  box.innerHTML = '';
+  for (var i=0;i<list.length;i++){
+    (function(w){
+      var item = document.createElement('div');
+      item.className = 'worldItem';
+      var thumb = localStorage.getItem('mc_world_' + w.id + '_thumb') || '';
+      var img = document.createElement('img');
+      img.src = thumb || TEX.grass_top;
+      var info = document.createElement('div');
+      info.className = 'info';
+      info.innerHTML =
+        '<div class="nm">' + escapeHtml(w.name||'未知') + '</div>' +
+        '<div class="meta">种子 ' + (w.seed||0) + ' · ' + fmtTime(w.updated||Date.now()) + '</div>';
+      var acts = document.createElement('div');
+      acts.className = 'acts';
+      var btnLoad = document.createElement('button');
+      btnLoad.className = 'tinyBtn';
+      btnLoad.textContent = '加载';
+      btnLoad.addEventListener('click', function(e){
+        e.stopPropagation();
+        if (loadFromLocal(w.id)){
+          startGame();
+        } else {
+          alert('加载失败');
+        }
+      });
+      var btnExp = document.createElement('button');
+      btnExp.className = 'tinyBtn';
+      btnExp.textContent = '导出';
+      btnExp.addEventListener('click', function(e){
+        e.stopPropagation();
+        if (loadFromLocal(w.id)) exportWorld();
+      });
+      var btnDel = document.createElement('button');
+      btnDel.className = 'tinyBtn';
+      btnDel.textContent = '删除';
+      btnDel.addEventListener('click', function(e){
+        e.stopPropagation();
+        if (confirm('确认删除"' + (w.name||'') + '"？')){
+          deleteLocal(w.id);
+          renderWorldList();
+        }
+      });
+      acts.appendChild(btnLoad);
+      acts.appendChild(btnExp);
+      acts.appendChild(btnDel);
+      info.appendChild(acts);
+      item.appendChild(img);
+      item.appendChild(info);
+      item.addEventListener('click', function(){
+        if (loadFromLocal(w.id)) startGame();
+      });
+      box.appendChild(item);
+    })(list[i]);
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* 导入 */
+$('btnImport').addEventListener('click', function(){ $('fileImport').click(); });
+$('fileImport').addEventListener('change', function(){
+  if (this.files && this.files[0]){
+    var f = this.files[0];
+    importWorld(f, function(err){
+      if (err){ alert('导入失败：' + err.message); }
+      else { alert('导入成功！'); renderWorldList(); }
+      $('fileImport').value = '';
+    });
+  }
+});
+
+/* 设置 */
+$('btnSettings').addEventListener('click', function(){
+  showScreen('dlgSettings');
+  updateSettingsUI();
+});
+$('btnSettingsOk').addEventListener('click', function(){
+  saveCFG();
+  showScreen('menu');
+});
+$('stSens').addEventListener('input', function(){
+  CFG.sens = parseInt(this.value,10);
+  SENS = CFG.sens/100;
+  $('stSensVal').textContent = SENS.toFixed(1) + '×';
+  saveCFG();
+});
+$('stFov').addEventListener('input', function(){
+  CFG.fov = parseInt(this.value,10);
+  $('stFovVal').textContent = CFG.fov + '°';
+  saveCFG();
+});
+
+function updateSettingsUI(){
+  $('stSens').value = CFG.sens;
+  $('stFov').value = CFG.fov;
+  $('stSensVal').textContent = (CFG.sens/100).toFixed(1) + '×';
+  $('stFovVal').textContent = CFG.fov + '°';
+  updateToggle('tgLeaves', CFG.leaves);
+  updateToggle('tgPerf', CFG.perf);
+}
+function updateToggle(id, v){
+  var opts = $(id).querySelectorAll('.opt');
+  for (var i=0;i<opts.length;i++){
+    if (parseInt(opts[i].getAttribute('data-v'),10) === v) opts[i].classList.add('on');
+    else opts[i].classList.remove('on');
+  }
+}
+function bindToggle(id, cb){
+  var el = $(id);
+  var opts = el.querySelectorAll('.opt');
+  for (var i=0;i<opts.length;i++){
+    (function(opt){
+      opt.addEventListener('click', function(e){
+        e.stopPropagation();
+        var v = parseInt(opt.getAttribute('data-v'),10);
+        updateToggle(id, v);
+        if (cb) cb(v);
+      });
+    })(opts[i]);
+  }
+}
+bindToggle('tgLeaves', function(v){
+  CFG.leaves = v; saveCFG();
+  if (running) rebuildAll();
+});
+bindToggle('tgPerf', function(v){
+  CFG.perf = v; saveCFG();
+  if (v === 0) MAX_PIXELS = 3.6e6;
+  else if (v === 1) MAX_PIXELS = 2.4e6;
+  else MAX_PIXELS = 1.4e6;
+  applySize();
+});
+
+/* 暂停 */
+function togglePause(){
+  if (!running) return;
+  if ($('pause').classList.contains('on')){
+    showScreen('');
+    $('hud').style.display = 'block';
+    if (!isTouch && canvas.requestPointerLock) canvas.requestPointerLock();
+  } else {
+    if (locked && document.exitPointerLock) document.exitPointerLock();
+    $('hud').style.display = 'none';
+    showScreen('pause');
+  }
+}
+$('btnPause').addEventListener('click', togglePause);
+$('btnResume').addEventListener('click', togglePause);
+$('btnSave').addEventListener('click', function(){
+  if (saveToLocal()) alert('已保存');
+  else alert('保存失败');
+});
+$('btnExport').addEventListener('click', function(){
+  exportWorld();
+});
+$('btnPauseSettings').addEventListener('click', function(){
+  showScreen('dlgSettings');
+  updateSettingsUI();
+});
+$('btnQuit').addEventListener('click', function(){
+  saveToLocal();
+  running = false;
+  showScreen('menu');
+  $('hud').style.display = 'none';
+  if (locked && document.exitPointerLock) document.exitPointerLock();
+  /* 清理 */
+  chunks.forEach(function(c){
+    if (c.vboO) gl.deleteBuffer(c.vboO);
+    if (c.vboT) gl.deleteBuffer(c.vboT);
+  });
+  chunks.clear();
+  lastChunkX = -9999; lastChunkZ = -9999;
+  visibleList.length = 0;
+});
+
+/* =========================================================
+   重建全部
+   ========================================================= */
+function rebuildAll(){
+  chunks.forEach(function(c){ c.dirty = true; });
+  showScreen('loading');
+  $('loadFill').style.width = '0%';
+  $('loadTxt').textContent = '重建网格…';
+  var list = [];
+  chunks.forEach(function(c){ list.push(c); });
+  var idx = 0;
+  function step(){
+    var t0 = performance.now();
+    while (idx < list.length && performance.now()-t0 < 24){
+      buildChunkMesh(list[idx++]);
+    }
+    var pct = list.length ? (idx/list.length*100) : 100;
+    $('loadFill').style.width = pct.toFixed(1)+'%';
+    $('loadTxt').textContent = pct.toFixed(0)+'%';
+    if (idx < list.length) requestAnimationFrame(step);
+    else {
+      showScreen('');
+      $('hud').style.display = 'block';
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+/* =========================================================
+   启动游戏
+   ========================================================= */
+function startGame(){
+  showScreen('loading');
+  $('loadFill').style.width = '0%';
+  $('loadTxt').textContent = '生成纹理…';
+
+  renderDist = CFG.dist;
+  SENS = CFG.sens/100;
+  if (CFG.perf === 0) MAX_PIXELS = 3.6e6;
+  else if (CFG.perf === 1) MAX_PIXELS = 2.4e6;
+  else MAX_PIXELS = 1.4e6;
+
+  function afterAtlas(){
+    applySize();
+    if (!currentWorldId) findSpawn();
+    else if (P.y < 0 || P.y > WH) findSpawn();
+    if (P.yaw === 0 && P.pitch === 0) P.pitch = -0.15;
+
+    /* 生成出生点周边 */
+    var pcx = Math.floor(P.x/CS), pcz = Math.floor(P.z/CS);
+    lastChunkX = -9999; lastChunkZ = -9999;
+    updateChunks(true);
+
+    $('loadTxt').textContent = '构建网格…';
+    var list = [];
+    chunks.forEach(function(c){ if (c.dirty) list.push(c); });
+    var idx = 0;
+
+    function step(){
+      var t0 = performance.now();
+      while (idx < list.length && performance.now()-t0 < 26){
+        buildChunkMesh(list[idx++]);
+      }
+      var pct = list.length ? (idx/list.length*100) : 100;
+      $('loadFill').style.width = pct.toFixed(1)+'%';
+      $('loadTxt').textContent = pct.toFixed(0)+'%';
+      if (idx < list.length){
+        requestAnimationFrame(step);
+      } else {
+        showScreen('');
+        $('hud').style.display = 'block';
+        buildHotbar();
+        if (!isTouch){
+          var t = $('tip');
+          t.innerHTML = '点击画面锁定鼠标<br>WASD 移动 / 空格跳跃<br>左键挖 / 右键放 / ESC 菜单';
+        } else {
+          $('tip').style.display = 'none';
+        }
+        running = true;
+        lastT = 0;
+        infoT = 0;
+        resT = 0;
+        visCamX = -9999;
+        requestAnimationFrame(loop);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  if (atlasTex){
+    afterAtlas();
+  } else {
+    buildAtlas(function(cv){
+      atlasTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, atlasTex);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cv);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      afterAtlas();
+    });
+  }
+}
+
+})();
+</script>
+</body>
+</html>

@@ -214,7 +214,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:3px;bac
   <div id="btnBreak" class="gbtn">挖</div>
   <div id="btnPlace" class="gbtn">放</div>
   <div id="btnChat" class="gbtn">💬</div>
-  <div id="btnPause" class="gbtn">☰</div><div id="btnView" class="gbtn" style="right:14px;top:152px;width:40px;height:40px;font-size:13px;border-radius:6px;">视角</div>
+  <div id="btnPause" class="gbtn">☰</div><div id="btnView" class="gbtn" style="right:14px;top:104px;width:40px;height:40px;font-size:13px;border-radius:6px;">视角</div>
   <div id="tip"></div>
 </div>
 
@@ -1243,7 +1243,7 @@ function render(){
       }
     }
     gl.uniform3f(uOffset,0,0,0);
-    gl.uniform1f(uModelYaw,0);if(typeof CAM!=='undefined'&&CAM.mode===1&&playerVBOs){gl.uniform3f(uOffset,P.x,P.y,P.z);gl.uniform1f(uModelYaw,P.yaw);for(var _si=0;_si<playerVBOs.length;_si++){var _sp=playerVBOs[_si];var _sc=_sp.color;var _skin=(Math.abs(_sc[0]-0.78)<0.06&&Math.abs(_sc[1]-0.58)<0.06);if(_skin){gl.uniform3f(uTint,_sc[0],_sc[1],_sc[2]);}else{gl.uniform3f(uTint,0.28,0.55,0.78);}gl.bindBuffer(gl.ARRAY_BUFFER,_sp.vbo);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,24,12);gl.vertexAttribPointer(aBright,1,gl.FLOAT,false,24,20);gl.drawArrays(gl.TRIANGLES,0,_sp.count);}gl.uniform3f(uOffset,0,0,0);gl.uniform1f(uModelYaw,0);gl.uniform3f(uTint,1,1,1);}
+    gl.uniform1f(uModelYaw,0);if(typeof CAM!=='undefined'&&CAM.mode===1&&playerVBOs){gl.uniform3f(uOffset,P.x,P.y,P.z);gl.uniform1f(uModelYaw,P.yaw);for(var _si=0;_si<playerVBOs.length;_si++){var _sp=playerVBOs[_si];var _sc=_sp.color;var _skin=(Math.abs(_sc[0]-0.78)<0.06&&Math.abs(_sc[1]-0.58)<0.06);if(_skin){gl.uniform3f(uTint,_sc[0],_sc[1],_sc[2]);}else{gl.uniform3f(uTint,0.28,0.55,0.78);}gl.bindBuffer(gl.ARRAY_BUFFER,_sp.vbo);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,24,12);gl.vertexAttribPointer(aBright,1,gl.FLOAT,false,24,24,20);gl.drawArrays(gl.TRIANGLES,0,_sp.count);}gl.uniform3f(uOffset,0,0,0);gl.uniform1f(uModelYaw,0);gl.uniform3f(uTint,1,1,1);}
     gl.uniform3f(uTint,1,1,1);
   }
 }
@@ -1792,7 +1792,7 @@ function startGame(){
     requestAnimationFrame(step);
   }
 
-  if(!playerVBOs)buildPlayerModels();console.log('[model] built:',playerVBOs?playerVBOs.length:0);if(atlasTex)afterAtlas();
+  if(!playerVBOs)buildPlayerModels();if(atlasTex)afterAtlas();
   else{
     buildAtlas(function(cv){
       atlasTex=gl.createTexture();

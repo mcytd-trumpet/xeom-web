@@ -210,11 +210,11 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:3px;bac
   <div id="chatBox"><input type="text" id="chatInput" maxlength="80" placeholder="按 Enter 发送…"></div>
   <div id="joy"><div id="joyKnob"></div></div>
   <div id="hotbar"></div>
-  <div id="btnJump" class="gbtn">跳</div><div id="btnDescend" class="gbtn" style="right:150px;bottom:20px;width:56px;height:56px;font-size:14px;">蹲</div>
+  <div id="btnJump" class="gbtn">跳</div>
   <div id="btnBreak" class="gbtn">挖</div>
   <div id="btnPlace" class="gbtn">放</div>
   <div id="btnChat" class="gbtn">💬</div>
-  <div id="btnPause" class="gbtn">☰</div><div id="btnView" class="gbtn" style="right:14px;top:152px;width:40px;height:40px;font-size:13px;border-radius:6px;">视角</div>
+  <div id="btnPause" class="gbtn">☰</div>
   <div id="tip"></div>
 </div>
 
@@ -713,13 +713,13 @@ function doPlace(){
   if(NET.connected())NET.sendBlock(px,py,pz,S.sel);
   gravityQueue.push([px,py,pz]);
 }
-var _lastSpace=0;function doJump(){if(typeof AD!=='undefined'&&AD.fly)return;if(P.onGround){P.vy=8.5;P.onGround=false;}if(typeof AD!=='undefined'&&AD.mode===1){var _n=performance.now();if(_n-_lastSpace<350){AD.fly=true;P.vy=0;if(window._adRf)window._adRf('adFly',1);if(typeof addChatMessage==='function')addChatMessage('系统','飞行: 开');if(typeof updateFlyUI==='function')updateFlyUI();_lastSpace=0;}else{_lastSpace=_n;}}}
+function doJump(){if(P.onGround){P.vy=8.5;P.onGround=false;}}
 function clampPitch(){var L=Math.PI/2-0.02;if(P.pitch>L)P.pitch=L;if(P.pitch<-L)P.pitch=-L;}
 function processGravity(){var n=0;while(gravityQueue.length>0&&n++<32){var g=gravityQueue.shift();fallSand(g[0],g[1],g[2]);}}
 
 /* ===== 网络 ===== */
 function nameToColor(str){var h=0;for(var i=0;i<str.length;i++)h=((h<<5)-h+str.charCodeAt(i))|0;return [((h&0xFF)/255*0.5+0.5),(((h>>8)&0xFF)/255*0.5+0.5),(((h>>16)&0xFF)/255*0.5+0.5)];}
-var AD={mode:0,weather:0,fly:false,isAdmin:false,speed:1.0,flySpeed:1.0};
+var AD={mode:0,weather:0,fly:false,isAdmin:false};
 var NET={
   ws:null,roomId:null,name:'Player',players:{},lastSend:0,
   genRoomId:function(){var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='';for(var i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s;},
@@ -850,152 +850,7 @@ function bindBtn(id,fn,rep){
 bindBtn('btnBreak',doBreak,200);
 bindBtn('btnPlace',doPlace,0);
 bindBtn('btnJump',doJump,0);
-/* 蹲键 + 飞行降键 */
-function _sneakOn(){ try{ PH=1.5; EYE=1.32; }catch(e){} }
-function _sneakOff(){ try{ PH=1.8; EYE=1.62; }catch(e){} }
-function _descDown(e){ if(e){e.preventDefault();e.stopPropagation();}
-  if(typeof AD!=='undefined'&&AD.fly){ S.down=true; }
-  else { _sneakOn(); }
-}
-function _descUp(e){ if(e){e.preventDefault();e.stopPropagation();}
-  S.down=false;
-  if(!(typeof AD!=='undefined'&&AD.fly)){ _sneakOff(); }
-}
-(function(){
-  var d = document.getElementById('btnDescend');
-  if(!d) return;
-  d.addEventListener('touchstart',_descDown,{passive:false});
-  d.addEventListener('touchend',_descUp,{passive:false});
-  d.addEventListener('touchcancel',_descUp,{passive:false});
-  d.addEventListener('mousedown',_descDown);
-  d.addEventListener('mouseup',_descUp);
-  d.addEventListener('mouseleave',_descUp);
-})();
-window.addEventListener('keydown',function(e){
-  if(e.code==='ShiftLeft'||e.code==='ShiftRight'){
-    if(!(typeof AD!=='undefined'&&AD.fly)) _sneakOn();
-  }
-});
-window.addEventListener('keyup',function(e){
-  if(e.code==='ShiftLeft'||e.code==='ShiftRight') _sneakOff();
-});
 $('btnChat').addEventListener('click',toggleChat);
-function adRf(id,v){
-  var el=document.getElementById(id); if(!el)return;
-  var o=el.querySelectorAll('.opt');
-  for(var i=0;i<o.length;i++){
-    if(parseInt(o[i].getAttribute('data-v'),10)===v)o[i].classList.add('on');
-    else o[i].classList.remove('on');
-  }
-}
-window._adRf=adRf;
-function adExec(line){
-  line=(line||'').trim(); if(!line)return;
-  if(line.charAt(0)==='/')line=line.slice(1);
-  var p=line.split(/\s+/),c=(p[0]||'').toLowerCase(),msg='';
-  if(c==='tp'&&p.length>=4){
-    var x=parseFloat(p[1]),y=parseFloat(p[2]),z=parseFloat(p[3]);
-    if(!isNaN(x)&&!isNaN(y)&&!isNaN(z)){P.x=x;P.y=y;P.z=z;P.vx=P.vy=P.vz=0;msg='tp '+x+' '+y+' '+z;}
-  }else if(c==='time'){
-    var v=(p[1]||'').toLowerCase();
-    if(v==='day'||v==='noon')worldTime=6000;
-    else if(v==='night'||v==='midnight')worldTime=18000;
-    else if(v==='dawn')worldTime=0;
-    else if(v==='dusk')worldTime=12000;
-    else if(/^\d+$/.test(v))worldTime=parseInt(v,10)%24000;
-    msg='time '+worldTime;
-  }else if(c==='gamemode'||c==='gm'){
-    var m=(p[1]||'').toLowerCase();
-    AD.mode=(m==='c'||m==='creative'||m==='1')?1:0;
-    AD.fly=(AD.mode===1);
-    adRf('adMode',AD.mode); adRf('adFly',AD.fly?1:0);
-    msg='mode '+(AD.mode?'creative':'survival');
-  }else if(c==='weather'){
-    var w=(p[1]||'').toLowerCase();
-    AD.weather=(w==='rain')?1:(w==='thunder')?2:0;
-    adRf('adWeather',AD.weather);
-    msg='weather '+AD.weather;
-  }else if(c==='fly'){
-    AD.fly=(p[1]||'').toLowerCase()!=='off';
-    adRf('adFly',AD.fly?1:0);
-    msg='fly '+(AD.fly?'on':'off');
-  }else if(c==='speed'){
-  var v=parseFloat(p[1]);
-  if(!isNaN(v)&&v>0&&v<=5){AD.speed=v;var _e=document.getElementById('adSpeed');if(_e)_e.value=v*100;var _l=document.getElementById('adSpeedVal');if(_l)_l.textContent=v.toFixed(1)+'×';msg='speed '+v;}
-}else if(c==='flyspeed'){
-  var v2=parseFloat(p[1]);
-  if(!isNaN(v2)&&v2>0&&v2<=5){AD.flySpeed=v2;var _e2=document.getElementById('adFlySpd');if(_e2)_e2.value=v2*100;var _l2=document.getElementById('adFlyVal');if(_l2)_l2.textContent=v2.toFixed(1)+'×';msg='flyspeed '+v2;}
-}else if(c==='kill'){P.y=-100;msg='kill';}
-  else if(c==='give'){
-    var id=parseInt(p[1],10);
-    if(!isNaN(id)&&B[id]){S.sel=id;if(typeof buildHotbar==='function')buildHotbar();msg='give '+B[id].name;}
-  }else if(c==='help'){
-    msg='/tp x y z | /time day|night | /gamemode s|c | /weather | /fly on|off | /speed 1-5 | /flyspeed 1-5 | /kill | /give id';
-  }
-  if(msg&&typeof addChatMessage==='function')addChatMessage('系统',msg);
-}
-function adInit(){
-  var h=location.hostname;
-  if(h==='127.0.0.1'||h==='localhost'||h==='')return;
-  var btn=document.getElementById('adBtn');
-  var panel=document.getElementById('adminPanel');
-  if(!btn||!panel)return;
-  btn.style.display='flex';
-  btn.addEventListener('click',function(e){
-    e.stopPropagation();
-    panel.style.display=(panel.style.display==='block')?'none':'block';
-    if(panel.style.display==='block'&&document.pointerLockElement)document.exitPointerLock();
-  });
-  var cl=document.getElementById('adClose');
-  if(cl)cl.addEventListener('click',function(){panel.style.display='none';});
-  function bind(id,cb){
-    var el=document.getElementById(id); if(!el)return;
-    var o=el.querySelectorAll('.opt');
-    for(var i=0;i<o.length;i++)(function(opt){
-      opt.addEventListener('click',function(){
-        var v=parseInt(opt.getAttribute('data-v'),10);
-        for(var j=0;j<o.length;j++)o[j].classList.remove('on');
-        opt.classList.add('on');
-        if(cb)cb(v);
-      });
-    })(o[i]);
-  }
-  bind('adMode',function(v){AD.mode=v;if(v===1){AD.fly=true;adRf('adFly',1);}});
-  bind('adWeather',function(v){AD.weather=v;});
-  bind('adTime',function(v){worldTime=(v===0)?6000:18000;});
-  bind('adFly',function(v){AD.fly=!!v;if(v)P.vy=0;});
-  var cmd=document.getElementById('adCmd');
-  if(cmd)cmd.addEventListener('keydown',function(e){
-    if(e.key==='Enter'){adExec(this.value);this.value='';this.blur();}
-  });
-  try{
-    if(!sessionStorage.getItem('ad_auto')){
-      sessionStorage.setItem('ad_auto','1');
-      setTimeout(function(){panel.style.display='block';},900);
-    }
-  }catch(e){}
-}
-setTimeout(adInit,600);
-setTimeout(function(){
-  var el1=document.getElementById('adSpeed');
-  if(el1)el1.addEventListener('input',function(){
-    var v=parseInt(this.value,10)/100;
-    AD.speed=v;
-    var lbl=document.getElementById('adSpeedVal');
-    if(lbl)lbl.textContent=v.toFixed(1)+'×';
-  });
-  var el2=document.getElementById('adFlySpd');
-  if(el2)el2.addEventListener('input',function(){
-    var v=parseInt(this.value,10)/100;
-    AD.flySpeed=v;
-    var lbl=document.getElementById('adFlyVal');
-    if(lbl)lbl.textContent=v.toFixed(1)+'×';
-  });
-},800);
-
-var _lastFly=null;function updateFlyUI(){var j=document.getElementById('btnJump');var d=document.getElementById('btnDescend');if(!j||!d)return;var f=(typeof AD!=='undefined'&&AD.fly)?1:0;if(f===_lastFly)return;_lastFly=f;if(f){j.textContent='升';d.textContent='降';}else{j.textContent='跳';d.textContent='蹲';}}
-setInterval(updateFlyUI,300);
-;
 
 /* ===== 物品栏 ===== */
 var HOTBAR=[GRASS,DIRT,STONE,COBBLE,LOG,LEAVES,SAND,PLANKS,GLASS];
@@ -1088,13 +943,13 @@ function update(dt){
   var cy=Math.cos(P.yaw),sy=Math.sin(P.yaw);
   var wx=-sy*kf+cy*ks;
   var wz=-cy*kf-sy*ks;
-  var SPD=4.6*(typeof AD!=='undefined'?AD.speed:1);
+  var SPD=4.6;
   var tVX=wx*SPD,tVZ=wz*SPD;
   var rate=P.onGround?22:6,f=1-Math.exp(-rate*dt);
   P.vx+=(tVX-P.vx)*f;
   P.vz+=(tVZ-P.vz)*f;
-  if(typeof AD!=='undefined'&&AD.fly){var _fv=0;var _fs=(typeof AD!=='undefined'?AD.flySpeed:1)*5;if(S.keys['Space']||S.keys['KeyW']||S.up)_fv=_fs;if(S.keys['ShiftLeft']||S.keys['ShiftRight']||S.keys['KeyS']||S.down)_fv=-_fs;P.vy=_fv;P.onGround=false;}else{P.vy-=27*dt;
-  if(P.vy<-35)P.vy=-35;}
+  P.vy-=27*dt;
+  if(P.vy<-35)P.vy=-35;
   P.onGround=false;
   moveWithCollision(P.vx*dt,P.vy*dt,P.vz*dt);
   if(!P.onGround&&P.vy<=0&&grounded()){P.onGround=true;P.vy=0;}
@@ -1180,7 +1035,7 @@ function render(){
   var fx=-sy*cp,fy=sp,fz=-cy*cp;
   var rx=cy,ry=0,rz=-sy;
   var ux=ry*fz-rz*fy,uy=rz*fx-rx*fz,uz=rx*fy-ry*fx;
-  var ex=P.x,ey=P.y+EYE,ez=P.z;if(typeof CAM!=='undefined'&&CAM.mode===1){ex-=fx*CAM.dist;ey-=fy*CAM.dist;ez-=fz*CAM.dist;}
+  var ex=P.x,ey=P.y+EYE,ez=P.z;
   var v=mView;
   v[0]=rx;v[4]=ry;v[8]=rz;
   v[1]=ux;v[5]=uy;v[9]=uz;
@@ -1243,7 +1098,7 @@ function render(){
       }
     }
     gl.uniform3f(uOffset,0,0,0);
-    gl.uniform1f(uModelYaw,0);if(typeof CAM!=='undefined'&&CAM.mode===1&&playerVBOs){gl.uniform3f(uOffset,P.x,P.y,P.z);gl.uniform1f(uModelYaw,P.yaw);for(var _si=0;_si<playerVBOs.length;_si++){var _sp=playerVBOs[_si];var _sc=_sp.color;var _skin=(Math.abs(_sc[0]-0.78)<0.06&&Math.abs(_sc[1]-0.58)<0.06);if(_skin){gl.uniform3f(uTint,_sc[0],_sc[1],_sc[2]);}else{gl.uniform3f(uTint,0.28,0.55,0.78);}gl.bindBuffer(gl.ARRAY_BUFFER,_sp.vbo);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,24,12);gl.vertexAttribPointer(aBright,1,gl.FLOAT,false,24,20);gl.drawArrays(gl.TRIANGLES,0,_sp.count);}gl.uniform3f(uOffset,0,0,0);gl.uniform1f(uModelYaw,0);gl.uniform3f(uTint,1,1,1);}
+    gl.uniform1f(uModelYaw,0);
     gl.uniform3f(uTint,1,1,1);
   }
 }
@@ -1653,8 +1508,8 @@ $('fileImport').addEventListener('change',function(){
 });
 
 /* 设置 */
-var _settingsFrom='menu';$('btnSettings').addEventListener('click',function(){_settingsFrom='menu';showScreen('dlgSettings');updateSettingsUI();});
-$('btnSettingsOk').addEventListener('click',function(){saveCFG();if(_settingsFrom==='pause'){showScreen('pause');}else{showScreen('menu');}});
+$('btnSettings').addEventListener('click',function(){showScreen('dlgSettings');updateSettingsUI();});
+$('btnSettingsOk').addEventListener('click',function(){saveCFG();showScreen('menu');});
 $('stSens').addEventListener('input',function(){CFG.sens=parseInt(this.value,10);SENS=CFG.sens/100;$('stSensVal').textContent=SENS.toFixed(1)+'×';saveCFG();});
 $('stFov').addEventListener('input',function(){CFG.fov=parseInt(this.value,10);$('stFovVal').textContent=CFG.fov+'°';saveCFG();});
 function updateSettingsUI(){
@@ -1709,7 +1564,7 @@ $('btnPause').addEventListener('click',togglePause);
 $('btnResume').addEventListener('click',togglePause);
 $('btnSave').addEventListener('click',function(){if(saveToLocal())alert('已保存');else alert('保存失败');});
 $('btnExport').addEventListener('click',function(){exportWorld();});
-$('btnPauseSettings').addEventListener('click',function(){_settingsFrom='pause';showScreen('dlgSettings');updateSettingsUI();});
+$('btnPauseSettings').addEventListener('click',function(){showScreen('dlgSettings');updateSettingsUI();});
 $('btnQuit').addEventListener('click',function(){
   saveToLocal();
   NET.disconnect();
@@ -1792,7 +1647,7 @@ function startGame(){
     requestAnimationFrame(step);
   }
 
-  if(!playerVBOs)buildPlayerModels();console.log('[model] built:',playerVBOs?playerVBOs.length:0);if(atlasTex)afterAtlas();
+  if(!playerVBOs)buildPlayerModels();if(atlasTex)afterAtlas();
   else{
     buildAtlas(function(cv){
       atlasTex=gl.createTexture();
@@ -1808,21 +1663,6 @@ function startGame(){
     });
   }
 }
-
-/* ===== 相机模式 ===== */
-var CAM={mode:0,dist:3.5};
-function _toggleCam(){
-  CAM.mode=CAM.mode===0?1:0;
-  try{addChatMessage('系统',CAM.mode===1?'第三人称':'第一人称');}catch(e){}
-}
-window.addEventListener('keydown',function(e){
-  if(e.code==='KeyC'){e.preventDefault();_toggleCam();}
-});
-setTimeout(function(){
-  var el=document.getElementById('btnView');
-  if(el&&!el._bound){el._bound=true;el.addEventListener('click',_toggleCam);}
-},500);
-
 })();
 
 /* ===== 背景音乐 ===== */
@@ -1862,5 +1702,5 @@ var MUSIC = {
 };
 MUSIC.init();
 </script>
-<div id="adminPanel" style="display:none;position:fixed;right:10px;top:62px;z-index:200;width:280px;background:#1d1d1d;border:2px solid #3c3c3c;border-radius:4px;padding:12px;color:#fff;font-size:13px;pointer-events:auto;box-shadow:0 6px 30px rgba(0,0,0,.85);"><div style="font-weight:700;text-align:center;color:#7fd45a;margin-bottom:8px;letter-spacing:1px;">管理员面板</div><div class="srow"><span>模式</span><div class="toggle" id="adMode"><div class="opt on" data-v="0">生存</div><div class="opt" data-v="1">创造</div></div></div><div class="srow"><span>天气</span><div class="toggle" id="adWeather"><div class="opt on" data-v="0">晴</div><div class="opt" data-v="1">雨</div><div class="opt" data-v="2">雷</div></div></div><div class="srow"><span>时间</span><div class="toggle" id="adTime"><div class="opt on" data-v="0">白天</div><div class="opt" data-v="1">夜晚</div></div></div><div class="srow"><span>飞行</span><div class="toggle" id="adFly"><div class="opt on" data-v="0">关</div><div class="opt" data-v="1">开</div></div></div><div class="srow"><span>移动速度</span><span class="sval" id="adSpeedVal">1.0×</span></div><input type="range" id="adSpeed" min="30" max="500" step="10" value="100"><div class="srow"><span>飞行速度</span><span class="sval" id="adFlyVal">1.0×</span></div><input type="range" id="adFlySpd" min="30" max="500" step="10" value="100"><input type="text" id="adCmd" placeholder="/tp 0 60 0" style="width:100%;margin-top:8px;padding:6px;background:#0e0e0e;border:1px solid #3a3a3a;border-radius:3px;color:#fff;font-size:12px;font-family:ui-monospace,monospace;outline:none;box-sizing:border-box;"><div style="font-size:10px;color:#666;margin-top:5px;line-height:1.6;">/tp x y z · /time day|night · /gamemode s|c · /weather · /fly on|off · /kill · /give id</div><button class="btn" id="adClose" style="margin-top:8px;padding:6px;font-size:12px;">关 闭</button></div><button id="adBtn" class="gbtn" style="display:none;right:14px;top:110px;width:40px;height:40px;font-size:16px;border-radius:6px;">⚙</button></body>
+</body>
 </html>

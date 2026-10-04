@@ -1,0 +1,163 @@
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async
+
+
+def _redis():
+    import redis
+    return redis.Redis(host="127.0.0.1", port=6379, decode_responses=True)
+
+
+def _room_exists(code):
+    try:
+        return _redis().exists("mc_room:" + code) > 0
+    except Exception:
+        return True
+
+
+def _incr_count(code):
+    try:
+        _redis().incr("mc_room_count:" + code)
+    except Exception:
+        pass
+
+
+def _decr_count(code):
+    try:
+        r = _redis()
+        n = r.decr("mc_room_count:" + code)
+        if n <= 0:
+            r.delete("mc_room_count:" + code)
+            r.delete("mc_room:" + code)
+    except Exception:
+        pass
+
+
+class MCGameConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.room_code = self.scope["url_route"]["kwargs"]["room_code"]
+        self.group_name = "mc_" + self.room_code
+        self.player_id = None
+        self.player_name = "Player"
+
+        exists = await sync_to_async(_room_exists)(self.room_code)
+        if not exists:
+            await self.accept()
+            await self.send(json.dumps({"t": "error", "msg": "房间不存在或已关闭"}))
+            await self.close()
+            return
+
+        await sync_to_async(_incr_count)(self.room_code)
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+        await self.send(json.dumps({"t": "ready"}))
+
+    async def disconnect(self, close_code):
+        if self.player_id:
+            await self.channel_layer.group_send(self.group_name, {
+                "type": "player_leave",
+                "player_id": self.player_id,
+                "player_name": self.player_name,
+            })
+            await sync_to_async(_decr_count)(self.room_code)
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+        except Exception:
+            return
+        t = data.get("t")
+
+        if t == "join":
+            self.player_id = data.get("pid", "")
+            self.player_name = data.get("name", "Player")
+            await self.channel_layer.group_send(self.group_name, {
+                "type": "player_join",
+                "player_id": self.player_id,
+                "player_name": self.player_name,
+                "x": data.get("x", 0),
+                "y": data.get("y", 64),
+                "z": data.get("z", 0),
+                "yaw": data.get("yaw", 0),
+                "pitch": data.get("pitch", 0),
+            })
+
+        elif t == "pos":
+            await self.channel_layer.group_send(self.group_name, {
+                "type": "player_pos",
+                "player_id": self.player_id,
+                "x": data.get("x", 0),
+                "y": data.get("y", 0),
+                "z": data.get("z", 0),
+                "yaw": data.get("yaw", 0),
+                "pitch": data.get("pitch", 0),
+            })
+
+        elif t == "block":
+            await self.channel_layer.group_send(self.group_name, {
+                "type": "block_change",
+                "player_id": self.player_id,
+                "x": data.get("x", 0),
+                "y": data.get("y", 0),
+                "z": data.get("z", 0),
+                "bid": data.get("id", 0),
+            })
+
+        elif t == "chat":
+            await self.channel_layer.group_send(self.group_name, {
+                "type": "chat_msg",
+                "player_id": self.player_id,
+                "name": self.player_name,
+                "msg": data.get("msg", ""),
+            })
+
+    async def player_join(self, event):
+        if event["player_id"] == self.player_id:
+            return
+        await self.send(json.dumps({
+            "t": "player_join",
+            "id": event["player_id"],
+            "name": event["player_name"],
+            "x": event["x"], "y": event["y"], "z": event["z"],
+            "yaw": event["yaw"], "pitch": event["pitch"],
+        }))
+
+    async def player_leave(self, event):
+        if event["player_id"] == self.player_id:
+            return
+        await self.send(json.dumps({
+            "t": "player_leave",
+            "id": event["player_id"],
+            "name": event["player_name"],
+        }))
+
+    async def player_pos(self, event):
+        if event["player_id"] == self.player_id:
+            return
+        await self.send(json.dumps({
+            "t": "pos",
+            "id": event["player_id"],
+            "x": event["x"], "y": event["y"], "z": event["z"],
+            "yaw": event["yaw"], "pitch": event["pitch"],
+        }))
+
+    async def block_change(self, event):
+        if event["player_id"] == self.player_id:
+            return
+        await self.send(json.dumps({
+            "t": "block",
+            "id": event["player_id"],
+            "x": event["x"], "y": event["y"], "z": event["z"],
+            "bid": event["bid"],
+        }))
+
+    async def chat_msg(self, event):
+        if event.get("player_id") == self.player_id:
+            return
+        await self.send(json.dumps({
+            "t": "chat",
+            "id": event["player_id"],
+            "name": event["name"],
+            "msg": event["msg"],
+        }))

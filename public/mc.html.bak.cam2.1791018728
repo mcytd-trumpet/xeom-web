@@ -214,7 +214,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:3px;bac
   <div id="btnBreak" class="gbtn">挖</div>
   <div id="btnPlace" class="gbtn">放</div>
   <div id="btnChat" class="gbtn">💬</div>
-  <div id="btnPause" class="gbtn">☰</div><div id="btnView" class="gbtn" style="right:14px;top:152px;width:40px;height:40px;font-size:13px;border-radius:6px;">视角</div>
+  <div id="btnPause" class="gbtn">☰</div>
   <div id="tip"></div>
 </div>
 
@@ -1180,7 +1180,7 @@ function render(){
   var fx=-sy*cp,fy=sp,fz=-cy*cp;
   var rx=cy,ry=0,rz=-sy;
   var ux=ry*fz-rz*fy,uy=rz*fx-rx*fz,uz=rx*fy-ry*fx;
-  var ex=P.x,ey=P.y+EYE,ez=P.z;if(typeof CAM!=='undefined'&&CAM.mode===1){ex-=fx*CAM.dist;ey-=fy*CAM.dist;ez-=fz*CAM.dist;}
+  var ex=P.x,ey=P.y+EYE,ez=P.z;
   var v=mView;
   v[0]=rx;v[4]=ry;v[8]=rz;
   v[1]=ux;v[5]=uy;v[9]=uz;
@@ -1243,7 +1243,7 @@ function render(){
       }
     }
     gl.uniform3f(uOffset,0,0,0);
-    gl.uniform1f(uModelYaw,0);if(typeof CAM!=='undefined'&&CAM.mode===1&&playerVBOs){gl.uniform3f(uOffset,P.x,P.y,P.z);gl.uniform1f(uModelYaw,P.yaw);for(var _si=0;_si<playerVBOs.length;_si++){var _sp=playerVBOs[_si];var _sc=_sp.color;var _skin=(Math.abs(_sc[0]-0.78)<0.06&&Math.abs(_sc[1]-0.58)<0.06);if(_skin){gl.uniform3f(uTint,_sc[0],_sc[1],_sc[2]);}else{gl.uniform3f(uTint,0.28,0.55,0.78);}gl.bindBuffer(gl.ARRAY_BUFFER,_sp.vbo);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(aUV,2,gl.FLOAT,false,24,12);gl.vertexAttribPointer(aBright,1,gl.FLOAT,false,24,20);gl.drawArrays(gl.TRIANGLES,0,_sp.count);}gl.uniform3f(uOffset,0,0,0);gl.uniform1f(uModelYaw,0);gl.uniform3f(uTint,1,1,1);}
+    gl.uniform1f(uModelYaw,0);
     gl.uniform3f(uTint,1,1,1);
   }
 }
@@ -1653,8 +1653,8 @@ $('fileImport').addEventListener('change',function(){
 });
 
 /* 设置 */
-var _settingsFrom='menu';$('btnSettings').addEventListener('click',function(){_settingsFrom='menu';showScreen('dlgSettings');updateSettingsUI();});
-$('btnSettingsOk').addEventListener('click',function(){saveCFG();if(_settingsFrom==='pause'){showScreen('pause');}else{showScreen('menu');}});
+$('btnSettings').addEventListener('click',function(){showScreen('dlgSettings');updateSettingsUI();});
+$('btnSettingsOk').addEventListener('click',function(){saveCFG();showScreen('menu');});
 $('stSens').addEventListener('input',function(){CFG.sens=parseInt(this.value,10);SENS=CFG.sens/100;$('stSensVal').textContent=SENS.toFixed(1)+'×';saveCFG();});
 $('stFov').addEventListener('input',function(){CFG.fov=parseInt(this.value,10);$('stFovVal').textContent=CFG.fov+'°';saveCFG();});
 function updateSettingsUI(){
@@ -1709,7 +1709,7 @@ $('btnPause').addEventListener('click',togglePause);
 $('btnResume').addEventListener('click',togglePause);
 $('btnSave').addEventListener('click',function(){if(saveToLocal())alert('已保存');else alert('保存失败');});
 $('btnExport').addEventListener('click',function(){exportWorld();});
-$('btnPauseSettings').addEventListener('click',function(){_settingsFrom='pause';showScreen('dlgSettings');updateSettingsUI();});
+$('btnPauseSettings').addEventListener('click',function(){showScreen('dlgSettings');updateSettingsUI();});
 $('btnQuit').addEventListener('click',function(){
   saveToLocal();
   NET.disconnect();
@@ -1792,7 +1792,7 @@ function startGame(){
     requestAnimationFrame(step);
   }
 
-  if(!playerVBOs)buildPlayerModels();console.log('[model] built:',playerVBOs?playerVBOs.length:0);if(atlasTex)afterAtlas();
+  if(!playerVBOs)buildPlayerModels();if(atlasTex)afterAtlas();
   else{
     buildAtlas(function(cv){
       atlasTex=gl.createTexture();
@@ -1808,21 +1808,6 @@ function startGame(){
     });
   }
 }
-
-/* ===== 相机模式 ===== */
-var CAM={mode:0,dist:3.5};
-function _toggleCam(){
-  CAM.mode=CAM.mode===0?1:0;
-  try{addChatMessage('系统',CAM.mode===1?'第三人称':'第一人称');}catch(e){}
-}
-window.addEventListener('keydown',function(e){
-  if(e.code==='KeyC'){e.preventDefault();_toggleCam();}
-});
-setTimeout(function(){
-  var el=document.getElementById('btnView');
-  if(el&&!el._bound){el._bound=true;el.addEventListener('click',_toggleCam);}
-},500);
-
 })();
 
 /* ===== 背景音乐 ===== */

@@ -214,7 +214,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:3px;bac
   <div id="btnBreak" class="gbtn">挖</div>
   <div id="btnPlace" class="gbtn">放</div>
   <div id="btnChat" class="gbtn">💬</div>
-  <div id="btnPause" class="gbtn">☰</div><div id="btnView" class="gbtn" style="right:14px;top:152px;width:40px;height:40px;font-size:13px;border-radius:6px;">视角</div>
+  <div id="btnPause" class="gbtn">☰</div><div id="btnView" class="gbtn" style="right:14px;top:104px;width:40px;height:40px;font-size:13px;border-radius:6px;">视角</div>
   <div id="tip"></div>
 </div>
 
