@@ -7,4 +7,5 @@ urlpatterns = [
     path("glass", views.glass, name="glass"),
     path("api/", include("core.urls")),
     path("mc", views.mc, name="mc"),
+    path("mc/", views.mc, name="mc")
 ]
